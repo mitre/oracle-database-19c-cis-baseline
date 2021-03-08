@@ -163,6 +163,33 @@ These checks are not included in the automation process.
 |oracle19c-6.1.16|Ensure the 'ALTER SYSTEM' Audit Option Is Enabled|
 |oracle19c-6.1.17|Ensure the 'TRIGGER' Audit Option Is Enabled|
 |oracle19c-6.1.18|Ensure the 'CREATE SESSION' Audit Option Is Enabled|
+|oracle19c-6.2.1|Ensure the 'CREATE USER' Action Audit Is Enabled|
+|oracle19c-6.2.2|Ensure the 'ALTER USER' Action Audit Is Enabled|
+|oracle19c-6.2.3|Ensure the 'DROP USER' Audit Option Is Enabled|
+|oracle19c-6.2.4|Ensure the 'CREATE ROLE' Action Audit Is Enabled|
+|oracle19c-6.2.5|Ensure the 'ALTER ROLE' Action Audit Is Enabled|
+|oracle19c-6.2.6|Ensure the 'DROP ROLE' Action Audit Is Enabled|
+|oracle19c-6.2.7|Ensure the 'GRANT' Action Audit Is Enabled|
+|oracle19c-6.2.8|Ensure the 'REVOKE' Action Audit Is Enabled|
+|oracle19c-6.2.9|Ensure the 'CREATE PROFILE' Action Audit Is Enabled|
+|oracle19c-6.2.10|Ensure the 'ALTER PROFILE' Action Audit Is Enabled|
+|oracle19c-6.2.11|Ensure the 'DROP PROFILE' Action Audit Is Enabled|
+|oracle19c-6.2.12|Ensure the 'CREATE DATABASE LINK' Action Audit Is Enabled|
+|oracle19c-6.2.13|Ensure the 'ALTER DATABASE LINK' Action Audit Is Enabled|
+|oracle19c-6.2.14|Ensure the 'DROP DATABASE LINK' Action Audit Is Enabled|
+|oracle19c-6.2.15|Ensure the 'CREATE SYNONYM' Action Audit Is Enabled|
+|oracle19c-6.2.16|Ensure the 'ALTER SYNONYM' Action Audit Is Enabled|
+|oracle19c-6.2.17|Ensure the 'DROP SYNONYM' Action Audit Is Enabled|
+|oracle19c-6.2.18|Ensure the 'SELECT ANY DICTIONARY' Privilege Audit Is Enabled|
+|oracle19c-6.2.19|Ensure the 'AUDSYS.AUD$UNIFIED' Access Audit Is Enabled|
+|oracle19c-6.2.20|Ensure the 'CREATE PROCEDURE/FUNCTION/PACKAGE/PACKAGE BODY' Action\nAudit Is Enabled|
+|oracle19c-6.2.21|Ensure the 'ALTER PROCEDURE/FUNCTION/PACKAGE/PACKAGE BODY' Action\nAudit Is Enabled|
+|oracle19c-6.2.22|Ensure the 'DROP PROCEDURE/FUNCTION/PACKAGE/PACKAGE BODY' Action Audit\nIs Enabled|
+|oracle19c-6.2.23|Ensure the 'ALTER SYSTEM' Privilege Audit Is Enabled|
+|oracle19c-6.2.24|Ensure the 'CREATE TRIGGER' Action Audit Is Enabled|
+|oracle19c-6.2.25|Ensure the  'ALTER TRIGGER' Action Audit IS Enabled|
+|oracle19c-6.2.26|Ensure the 'DROP TRIGGER' Action Audit Is Enabled|
+|oracle19c-6.2.27|Ensure the 'LOGON' AND 'LOGOFF' Actions Audit Is Enabled
 
 ## Authors
 
