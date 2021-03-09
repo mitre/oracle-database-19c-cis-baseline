@@ -51,5 +51,18 @@ connect to both places to revoke.
   tag cis_level: 1
   tag cis_controls: ['16.14', 'Rev_6']
   tag cis_rid: '4.5'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+  user_mig = sql.query("
+  SELECT OWNER, TABLE_NAME,
+  DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+  1,(SELECT NAME FROM V$DATABASE),
+  (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+  FROM CDB_TABLES A
+  WHERE TABLE_NAME='USER$MIG' AND OWNER='SYS';")
+
+  describe 'Ensure SYS.USER$MIG table has been dropped.' do
+    subject { user_mig }
+    it { should be_empty }
+  end
+end

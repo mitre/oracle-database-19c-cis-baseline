@@ -51,5 +51,15 @@ To assess this recommendation, execute the following SQL statement.
   tag cis_level: 1
   tag cis_controls: ['9', 'Rev_6']
   tag cis_rid: '2.2.5'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query("SELECT UPPER(VALUE) FROM V$SYSTEM_PARAMETER WHERE UPPER(NAME)='REMOTE_LISTENER';")
+  # .column('uppervalue')
+
+  describe 'REMOTE LISTENERS' do
+    subject { parameter }
+    #	it {should match ''}
+    it { should be_empty }
+  end
+end

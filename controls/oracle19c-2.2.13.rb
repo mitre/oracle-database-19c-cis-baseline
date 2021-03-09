@@ -36,5 +36,13 @@ gain access based upon known patch weaknesses."
   tag cis_level: 1
   tag cis_controls: ['9', 'Rev_6']
   tag cis_rid: '2.2.13'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query("select value from v$parameter where name = 'sec_return_server_release_banner';").column('value')
+
+  describe 'BANNER' do
+    subject { parameter }
+    it { should cmp 'FALSE' }
+  end
+end

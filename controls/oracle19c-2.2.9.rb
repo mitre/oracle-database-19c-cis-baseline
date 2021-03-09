@@ -37,5 +37,13 @@ password attacks quite difficult."
   tag cis_level: 1
   tag cis_controls: ['16', 'Rev_6']
   tag cis_rid: '2.2.9'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query("select value from v$parameter where name = 'sec_case_sensitive_logon';").column('value')
+
+  describe 'LOGO' do
+    subject { parameter }
+    it { should cmp 'TRUE' }
+  end
+end

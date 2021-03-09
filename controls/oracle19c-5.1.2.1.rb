@@ -107,5 +107,13 @@ connect to both places to revoke.
   tag cis_level: 1
   tag cis_controls: ['18', 'Rev_6']
   tag cis_rid: '5.1.2.1'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query("SELECT TABLE_NAME, PRIVILEGE, GRANTEE FROM DBA_TAB_PRIVS WHERE GRANTEE='PUBLIC' AND PRIVILEGE='EXECUTE' AND TABLE_NAME IN ('DBMS_BACKUP_RESTORE','DBMS_FILE_TRANSFER','DBMS_SYS_SQL','DBMS_REPCAT_SQL_U TL','INITJVMAUX', 'DBMS_AQADM_SYS','DBMS_STREAMS_RPC','DBMS_PRVTAQIM','LTADM', 'DBMS_IJOB','DBMS_PDB_EXEC_SQL');").column('value')
+
+  describe 'DefaultPR' do
+    subject { parameter }
+    it { should be_empty }
+  end
+end

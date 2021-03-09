@@ -79,5 +79,13 @@ ORACLE_MAINTAINED='Y')
   tag cis_level: 1
   tag cis_controls: ['5.1', 'Rev_6']
   tag cis_rid: '5.1.3.3'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query("SELECT GRANTEE,PRIVILEGE,TABLE_NAME FROM CDB_TAB_PRIVS WHERE TABLE_NAME IN ('CDB_LOCAL_ADMINAUTH$','DEFAULT_PWD$','ENC$','HIST_HEAD$','LINK$','PDB_SYNC$','SCHEDULER$_CREDENTIAL','USER$','USER_HISTORY$','XS$VERIFIERS') AND OWNER= 'SYS' AND GRANTEE NOT IN (SELECT USERNAME FROM DBA_USERS WHERE ORACLE_MAINTAINED='Y') AND GRANTEE NOT IN (SELECT ROLE FROM DBA_ROLES WHERE ORACLE_MAINTAINED='Y') ORDER BY CON_ID, TABLE_NAME;")
+
+  describe 'Sens' do
+    subject { parameter }
+    it { should be_empty }
+  end
+end

@@ -51,5 +51,13 @@ connect to both places to revoke.
   tag cis_level: 1
   tag cis_controls: ['16', 'Rev_6']
   tag cis_rid: '4.3'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query("select username from dba_users where authentication_type = 'EXTERNAL';").column('value')
+
+  describe 'ATYPE' do
+    subject { parameter }
+    it { should be_empty }
+  end
+end

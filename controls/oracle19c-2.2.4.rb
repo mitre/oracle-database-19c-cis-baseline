@@ -48,5 +48,13 @@ To assess this recommendation, execute the following SQL statement.
   tag cis_level: 1
   tag cis_controls: ['16', 'Rev_6']
   tag cis_rid: '2.2.4'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  os_role = sql.query("select value from v$parameter where name = 'os_roles';").column('value')
+
+  describe 'OS_ROLE' do
+    subject { os_role }
+    it { should cmp 'FALSE' }
+  end
+end

@@ -50,5 +50,28 @@ pluggable.
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.1.14'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  audit_options = sql.query("
+  SELECT *
+  FROM CDB_OBJ_AUDIT_OPTS
+  WHERE OBJECT_NAME='AUD$'
+  AND ALT='A/A'
+  AND AUD='A/A'
+  AND COM='A/A'
+  AND DEL='A/A'
+  AND GRA='A/A'
+  AND IND='A/A'
+  AND INS='A/A'
+  AND LOC='A/A'
+  AND REN='A/A'
+  AND SEL='A/A'
+  AND UPD='A/A'
+  AND FBK='A/A';").column('OBJECT_NAME')
+
+  describe 'Ensure ALL audit option is enabled on AUD$ system packages' do
+    subject { audit_options }
+    it { should_not be_empty }
+  end
+end
