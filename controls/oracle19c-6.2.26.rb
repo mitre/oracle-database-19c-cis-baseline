@@ -67,6 +67,7 @@ using the `CREATE AUDIT POLICY` statement.
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.2.26'
+
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
   parameter = sql.query("WITH
