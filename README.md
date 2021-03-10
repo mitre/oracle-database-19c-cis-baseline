@@ -20,7 +20,7 @@ While the Oracle 19c CIS automation profile check was developed to provide techn
 ### Update History 
 | Guidance Name  | Guidance Version | Guidance Location                            | Profile Version | Profile Release Date | STIG EOL    | Profile EOL |
 |---------------------------------------|------------------|--------------------------------------------|-----------------|----------------------|-------------|-------------|
-| CIS Benchmark for Oracle Database 19c | NA  | https://www.cisecurity.org/cis-benchmarks/ | 1.0.0   | | NA | NA |
+| CIS Benchmark for Oracle Database 19c | NA  | https://www.cisecurity.org/cis-benchmarks/ | 1.0.0   | 09-21-2020 | NA | NA |
 
 
 ## Getting Started
