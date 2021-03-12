@@ -56,7 +56,7 @@ until the `recyclebin` is emptied.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: [nil, 'Rev_4']
+  tag nist: ['AC-6', 'Rev_4']
   tag cis_level: 1
   tag cis_controls: ['18.9', 'Rev_6']
   tag cis_rid: '4.2'

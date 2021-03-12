@@ -47,7 +47,7 @@ connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: [nil, 'Rev_4']
+  tag nist: ['SC-28', 'Rev_4']
   tag cis_level: 1
   tag cis_controls: ['16.14', 'Rev_6']
   tag cis_rid: '4.5'
