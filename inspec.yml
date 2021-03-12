@@ -2,7 +2,29 @@ name: oracle-database-19c-cis-baseline
 title: Oracle Database 19c based on 19c CIS Benchmark
 maintainer: DISA DevSecOps Team
 copyright: Defense Information Systems Agency (DISA)
-copyright_email: you@example.com
 license: Apache-2.0
 summary: InSpec testing for baseline compliance with the Oracle 10c
 inspec_version: ">= 4.0"
+version: 0.1.0
+
+inputs:
+  - name: user
+    description: 'username Oracle DB'
+    value: oracleadmin
+
+  - name: password
+    description: 'password Oracle DB'
+    value: oracleadmin
+    sensitive: true
+
+  - name: host
+    description: 'hostname Oracle DB'
+    value: 127.0.0.1
+
+  - name: service
+    description: 'service name Oracle DB'
+    value: oracledb
+
+  - name: sqlplus_bin
+    description: 'Location of sqlplus tool'
+    value: /path/to/sqlplus_bin
