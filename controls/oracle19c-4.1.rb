@@ -82,5 +82,31 @@ changed.');
   tag cis_level: 1
   tag cis_controls: ['5.3', 'Rev_6']
   tag cis_rid: '4.1'
+
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  if !input('multitenant')
+    query_string = "
+      SELECT DISTINCT A.USERNAME
+      FROM DBA_USERS_WITH_DEFPWD A, DBA_USERS B
+      WHERE A.USERNAME = B.USERNAME
+      AND B.ACCOUNT_STATUS = 'OPEN';
+    "
+  else
+    query_string = "
+      SELECT DISTINCT A.USERNAME,
+      DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_USERS_WITH_DEFPWD A, CDB_USERS C
+      WHERE A.USERNAME = C.USERNAME
+      AND C.ACCOUNT_STATUS = 'OPEN';
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'Default passwords should be changed -- profiles with default passwords'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
 end
 

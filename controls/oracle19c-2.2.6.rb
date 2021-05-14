@@ -36,5 +36,18 @@ Guard, `EXCLUSIVE` is an allowable VALUE.
   tag cis_level: 1
   tag cis_controls: ['16', 'Rev_6']
   tag cis_rid: '2.2.6'
+
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query(
+    "SELECT UPPER(VALUE)
+    FROM V$SYSTEM_PARAMETER
+    WHERE UPPER(NAME)='REMOTE_LOGIN_PASSWORDFILE';"
+  ).column('upper(value)')
+
+  describe 'Oracle should not use a password file during login -- REMOTE_LOGIN_PASSWORDFILE' do
+    subject { parameter }
+    it { should be_in ['NONE', 'EXCLUSIVE'] }
+  end
 end
 

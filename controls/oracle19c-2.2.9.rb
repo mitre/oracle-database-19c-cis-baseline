@@ -40,9 +40,13 @@ password attacks quite difficult."
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  parameter = sql.query("select value from v$parameter where name = 'sec_case_sensitive_logon';").column('value')
+  parameter = sql.query(
+    "SELECT UPPER(VALUE)
+    FROM V$SYSTEM_PARAMETER
+    WHERE UPPER(NAME)='SEC_CASE_SENSITIVE_LOGON';"
+  ).column('upper(value)')
 
-  describe 'LOGO' do
+  describe 'Passwords should be case sensitive -- SEC_CASE_SENSITIVE_LOGON' do
     subject { parameter }
     it { should cmp 'TRUE' }
   end

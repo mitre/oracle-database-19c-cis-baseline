@@ -62,20 +62,33 @@ you must connect to both places to revoke:
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  dba_packages = sql.query("
-  SELECT GRANTEE,TABLE_NAME,
-  DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
-  1,(SELECT NAME FROM V$DATABASE),
-  (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
-  FROM CDB_TAB_PRIVS A
-  WHERE TABLE_NAME LIKE 'DBA_%'
-  AND OWNER = 'SYS'
-  AND GRANTEE NOT IN (SELECT USERNAME FROM CDB_USERS WHERE
+  if !input('multitenant')
+    query_string = "
+      SELECT GRANTEE,TABLE_NAME
+      FROM DBA_TAB_PRIVS
+      WHERE TABLE_NAME LIKE 'DBA_%'
+      AND OWNER = 'SYS'
+      AND GRANTEE NOT IN (SELECT USERNAME FROM DBA_USERS WHERE
   ORACLE_MAINTAINED='Y')
-  AND GRANTEE NOT IN (SELECT ROLE FROM CDB_ROLES WHERE ORACLE_MAINTAINED='Y');").column('table_name')
-
-  describe 'ALL privilege type should not be enabled on <DBA_%> oracle maintained packages' do
-    subject { dba_packages }
-    it { should be_empty }
+      AND GRANTEE NOT IN (SELECT ROLE FROM DBA_ROLES WHERE ORACLE_MAINTAINED='Y');
+    "
+  else
+    query_string = "
+      SELECT GRANTEE,TABLE_NAME,
+      DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_TAB_PRIVS A
+      WHERE TABLE_NAME LIKE 'DBA_%'
+      AND OWNER = 'SYS'
+      AND GRANTEE NOT IN (SELECT USERNAME FROM CDB_USERS WHERE
+  ORACLE_MAINTAINED='Y')
+      AND GRANTEE NOT IN (SELECT ROLE FROM CDB_ROLES WHERE ORACLE_MAINTAINED='Y');
+    "
   end
+  parameter = sql.query(query_string)
+  describe 'Unauthorized grantees should not have access to DBA_ schemas -- list of GRANTEES in DBA_ tables'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
 end

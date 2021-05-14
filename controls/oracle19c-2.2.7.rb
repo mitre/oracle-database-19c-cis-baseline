@@ -39,5 +39,18 @@ according to the needs of the organization."
   tag cis_level: 1
   tag cis_controls: ['16', 'Rev_6']
   tag cis_rid: '2.2.7'
+
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query(
+    "SELECT UPPER(VALUE)
+    FROM V$SYSTEM_PARAMETER
+    WHERE UPPER(NAME)='REMOTE_OS_AUTHENT';"
+  ).column('upper(value)')
+
+  describe 'OS roles for database connections should not be permitted -- REMOTE_OS_AUTHENT' do
+    subject { parameter }
+    it { should cmp 'FALSE' }
+  end
 end
 

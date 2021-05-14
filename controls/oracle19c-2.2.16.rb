@@ -50,5 +50,36 @@ To assess this recommendation, execute the following SQL statement.
   tag cis_level: 1
   tag cis_controls: ['14.4', 'Rev_6']
   tag cis_rid: '2.2.16'
+
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  if !input('multitenant')
+    query_string = "
+      SELECT UPPER(VALUE)
+      FROM V$SYSTEM_PARAMETER
+      WHERE UPPER(NAME)='RESOURCE_LIMIT';
+    "
+    val = 'upper(value)'
+    parameter = sql.query(query_string).column(val)
+  else
+    query_string = "
+      SELECT DISTINCT UPPER(V.VALUE),
+      DECODE (V.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B
+       WHERE V.CON_ID = B.CON_ID))
+      FROM V$SYSTEM_PARAMETER V
+      WHERE UPPER(NAME) = 'RESOURCE_LIMIT';
+    "
+    val = 'upper(v.value)'
+    parameter = sql.query(query_string).column(val)
+  end
+
+  parameter = sql.query(query_string).column(val)
+  
+  describe 'Resource limits should be set in database profiles -- RESOURCE_LIMIT' do
+    subject { parameter }
+    it { should cmp 'TRUE' }
+  end
 end
 

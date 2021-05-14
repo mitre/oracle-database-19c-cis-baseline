@@ -61,17 +61,29 @@ you must connect to both places to revoke.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  profiles = sql.query("SELECT A.USERNAME,
-  DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
-  1,(SELECT NAME FROM V$DATABASE),
-  (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
-  FROM CDB_USERS A
-  WHERE A.PROFILE='DEFAULT'
-  AND A.ACCOUNT_STATUS='OPEN'
-  AND A.ORACLE_MAINTAINED = 'N';").rows()
-
-  describe 'Users should be created with function-appropriate profiles.' do
-    subject { profiles }
-    it { should be_empty }
+  if !input('multitenant')
+    query_string = "
+      SELECT USERNAME
+      FROM DBA_USERS
+      WHERE PROFILE='DEFAULT'
+      AND ACCOUNT_STATUS='OPEN'
+      AND ORACLE_MAINTAINED = 'N';
+    "
+  else
+    query_string = "
+      SELECT A.USERNAME,
+      DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_USERS A
+      WHERE A.PROFILE='DEFAULT'
+      AND A.ACCOUNT_STATUS='OPEN'
+      AND A.ORACLE_MAINTAINED = 'N';
+    "
   end
+  parameter = sql.query(query_string)
+  describe 'No users should be assigned to the default profile -- the list of users where PROFILE=DEFAULT'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
 end

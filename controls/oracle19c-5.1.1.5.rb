@@ -78,19 +78,30 @@ connect to both places to revoke.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  job_scheduler_packages = sql.query("
-  SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
+  if !input('multitenant')
+    query_string = "
+      SELECT TABLE_NAME, PRIVILEGE, GRANTEE
+      FROM DBA_TAB_PRIVS
+      WHERE GRANTEE='PUBLIC'
+      AND PRIVILEGE='EXECUTE'
+      AND TABLE_NAME IN ('DBMS_SCHEDULER','DBMS_JOB');
+    "
+  else
+    query_string = "
+      SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
   V$DATABASE),
-  1,(SELECT NAME FROM V$DATABASE),
-  (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
-  FROM CDB_TAB_PRIVS A
-  WHERE GRANTEE='PUBLIC'
-  AND PRIVILEGE='EXECUTE'
-  AND TABLE_NAME IN ('DBMS_SCHEDULER','DBMS_JOB')
-  ORDER BY CON_ID, TABLE_NAME;").column('table_name')
-
-  describe 'Public should not be able to EXECUTE job scheduler packages' do
-    subject { job_scheduler_packages }
-    it { should be_empty }
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_TAB_PRIVS A
+      WHERE GRANTEE='PUBLIC'
+      AND PRIVILEGE='EXECUTE'
+      AND TABLE_NAME IN ('DBMS_SCHEDULER','DBMS_JOB')
+      ORDER BY CON_ID, TABLE_NAME;
+    "
   end
+  parameter = sql.query(query_string)
+  describe 'Public users should not be able to execute the `DBMS_SCHEDULER` or `DBMS_JOB` packages -- list of Job Scheduler packages with public execute privileges'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
 end

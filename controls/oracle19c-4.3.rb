@@ -54,10 +54,24 @@ connect to both places to revoke.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  parameter = sql.query("select username from dba_users where authentication_type = 'EXTERNAL';").column('value')
-
-  describe 'ATYPE' do
+  if !input('multitenant')
+    query_string = "
+      SELECT USERNAME FROM DBA_USERS WHERE AUTHENTICATION_TYPE = 'EXTERNAL';
+    "
+  else
+    query_string = "
+      SELECT A.USERNAME,
+      DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B
+       WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_USERS A
+      WHERE AUTHENTICATION_TYPE = 'EXTERNAL';
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'Users should not be able to authenticate via a remote OS -- for all users DBA_USERS.AUTHENTICATION_TYPE'  do
     subject { parameter }
     it { should be_empty }
-  end
+  end 
 end

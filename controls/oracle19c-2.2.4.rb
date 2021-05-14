@@ -51,10 +51,28 @@ To assess this recommendation, execute the following SQL statement.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  os_role = sql.query("select value from v$parameter where name = 'os_roles';").column('value')
+  if !input('multitenant')
+    query_string = "
+      SELECT UPPER(VALUE)
+      FROM V$SYSTEM_PARAMETER
+      WHERE UPPER(NAME)='OS_ROLES';
+    "
+  else
+    query_string = "
+      SELECT DISTINCT UPPER(V.VALUE),
+      DECODE (V.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B
+       WHERE V.CON_ID = B.CON_ID))
+      FROM V$SYSTEM_PARAMETER V
+      WHERE UPPER(NAME) = 'OS_ROLES';
+    "
+  end
 
-  describe 'OS_ROLE' do
-    subject { os_role }
+  parameter = sql.query(query_string).column('upper(v.value)')
+  
+  describe 'External groups should not be allowed for database management -- OS_ROLES' do
+    subject { parameter }
     it { should cmp 'FALSE' }
   end
 end

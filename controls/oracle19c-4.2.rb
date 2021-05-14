@@ -60,5 +60,29 @@ until the `recyclebin` is emptied.
   tag cis_level: 1
   tag cis_controls: ['18.9', 'Rev_6']
   tag cis_rid: '4.2'
+
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  if !input('multitenant')
+    query_string = "
+      SELECT USERNAME
+      FROM DBA_USERS
+      WHERE USERNAME IN ('BI','HR','IX','OE','PM','SCOTT','SH');
+    "
+  else
+    query_string = "
+      SELECT DISTINCT A.USERNAME,
+      DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_USERS A
+      WHERE A.USERNAME IN ('BI','HR','IX','OE','PM','SCOTT','SH');
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'Sample data should be removed -- sample schema and users'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
 end
 

@@ -47,5 +47,27 @@ connect to both places to revoke.
   tag cis_level: 1
   tag cis_controls: ['14.6', 'Rev_7']
   tag cis_rid: '4.6'
+
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  if !input('multitenant')
+    query_string = "
+      SELECT DB_LINK, HOST FROM DBA_DB_LINKS WHERE OWNER = 'PUBLIC';
+    "
+  else
+    query_string = "
+      SELECT DB_LINK, HOST,
+      DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_DB_LINKS A
+      WHERE OWNER = 'PUBLIC';
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'Ensure no public database links exist -- DBA_DB_LINKS with PUBLIC owner'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
 end
 

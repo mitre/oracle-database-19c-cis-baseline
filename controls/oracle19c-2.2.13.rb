@@ -39,9 +39,13 @@ gain access based upon known patch weaknesses."
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  parameter = sql.query("select value from v$parameter where name = 'sec_return_server_release_banner';").column('value')
+  parameter = sql.query(
+    "SELECT UPPER(VALUE)
+    FROM V$SYSTEM_PARAMETER
+    WHERE UPPER(NAME)='SEC_RETURN_SERVER_RELEASE_BANNER';"
+  ).column('upper(value)')
 
-  describe 'BANNER' do
+  describe 'Database should not return patch/update release info -- SEC_RETURN_SERVER_RELEASE_BANNER' do
     subject { parameter }
     it { should cmp 'FALSE' }
   end

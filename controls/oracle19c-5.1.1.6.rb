@@ -104,21 +104,32 @@ connect to both places to revoke.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  sql_inj_helper_packages = sql.query("
-  SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
+  if !input('multitenant')
+    query_string = "
+      SELECT TABLE_NAME, PRIVILEGE, GRANTEE
+      FROM DBA_TAB_PRIVS
+      WHERE GRANTEE='PUBLIC'
+      AND PRIVILEGE='EXECUTE'
+      AND TABLE_NAME IN ('DBMS_SQL', 'DBMS_XMLGEN',
+  'DBMS_XMLQUERY','DBMS_XMLSTORE','DBMS_XMLSAVE','DBMS_AW','OWA_UTIL','DBMS_REDACT');
+    "
+  else
+    query_string = "
+      SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
   V$DATABASE),
-  1,(SELECT NAME FROM V$DATABASE),
-  (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
-  FROM CDB_TAB_PRIVS A
-  WHERE GRANTEE='PUBLIC'
-  AND PRIVILEGE='EXECUTE'
-  AND TABLE_NAME IN ('DBMS_SQL', 'DBMS_XMLGEN',
-  'DBMS_XMLQUERY','DBMS_XMLSTORE','DBMS_XMLSAVE','DBMS_AW','OWA_UTIL','DBMS_RED
-  ACT')
-  ORDER BY CON_ID, TABLE_NAME;").column('table_name')
-
-  describe 'Public should not be able to EXECUTE SQL Injection Helper packages' do
-    subject { sql_inj_helper_packages }
-    it { should be_empty }
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_TAB_PRIVS A
+      WHERE GRANTEE='PUBLIC'
+      AND PRIVILEGE='EXECUTE'
+      AND TABLE_NAME IN ('DBMS_SQL', 'DBMS_XMLGEN',
+  'DBMS_XMLQUERY','DBMS_XMLSTORE','DBMS_XMLSAVE','DBMS_AW','OWA_UTIL','DBMS_REDACT')
+      ORDER BY CON_ID, TABLE_NAME;
+    "
   end
+  parameter = sql.query(query_string)
+  describe 'Public users should not be able to execute the `DBMS_SQL`, `DBMS_XMLGEN`, `DBMS_XMLQUERY`, `DBMS_XLMSTORE`, `DBMS_XLMSAVE` or `DBMS_REDACT` packages -- list of SQL Injection Helper Packages packages with public execute privileges'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
 end
