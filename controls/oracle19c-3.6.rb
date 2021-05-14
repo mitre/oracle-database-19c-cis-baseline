@@ -68,5 +68,46 @@ To assess this recommendation, execute the following SQL statement.
   tag cis_level: 1
   tag cis_controls: ['16', 'Rev_6']
   tag cis_rid: '3.6'
+
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  if !input('multitenant')
+    query_string = "
+      SELECT P.PROFILE, P.RESOURCE_NAME, P.LIMIT
+      FROM DBA_PROFILES P
+      WHERE TO_NUMBER(DECODE(P.LIMIT,
+       'DEFAULT',(SELECT DISTINCT DECODE(LIMIT,'UNLIMITED',9999,LIMIT)
+       FROM DBA_PROFILES
+       WHERE PROFILE='DEFAULT'
+       AND RESOURCE_NAME='PASSWORD_GRACE_TIME'),
+       'UNLIMITED','9999',P.LIMIT)) > 5 AND
+       P.RESOURCE_NAME = 'PASSWORD_GRACE_TIME' AND
+       EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
+    "
+  else
+    query_string = "
+      SELECT P.PROFILE, P.RESOURCE_NAME, P.LIMIT,
+      DECODE (P.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B
+       WHERE P.CON_ID = B.CON_ID)) DATABASE
+      FROM CDB_PROFILES P
+      WHERE TO_NUMBER(DECODE(P.LIMIT,
+       'DEFAULT',(SELECT DECODE(LIMIT,'UNLIMITED',9999,LIMIT)
+       FROM CDB_PROFILES
+       WHERE PROFILE='DEFAULT'
+       AND RESOURCE_NAME='PASSWORD_GRACE_TIME'
+       AND CON_ID = P.CON_ID),
+       'UNLIMITED','9999',P.LIMIT)) > 5
+      AND P.RESOURCE_NAME = 'PASSWORD_GRACE_TIME'
+      AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
+      ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'Passwords that expire without being changed should lock out the user after a short grace period -- profiles with PASSWORD_GRACE_TIME > 5'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
 end
 

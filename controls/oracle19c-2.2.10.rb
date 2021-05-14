@@ -34,5 +34,18 @@ denial-of-service."
   tag cis_level: 1
   tag cis_controls: ['16.7', 'Rev_6']
   tag cis_rid: '2.2.10'
+
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query(
+    "SELECT UPPER(VALUE)
+    FROM V$SYSTEM_PARAMETER
+    WHERE UPPER(NAME) = 'SEC_MAX_FAILED_LOGIN_ATTEMPTS';"
+  ).column('upper(value)')
+
+  describe 'SEC_MAX_FAILED_LOGIN_ATTEMPTS should be less than or equal to 3 -- SEC_MAX_FAILED_LOGIN_ATTEMPTS' do
+    subject { parameter }
+    it { should cmp <= 3 }
+  end
 end
 

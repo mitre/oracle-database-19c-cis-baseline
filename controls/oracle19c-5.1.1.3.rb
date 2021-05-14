@@ -81,5 +81,33 @@ connect to both places to revoke.
   tag cis_level: 1
   tag cis_controls: ['5.1', 'Rev_6']
   tag cis_rid: '5.1.1.3'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  if !input('multitenant')
+    query_string = "
+      SELECT TABLE_NAME, PRIVILEGE, GRANTEE
+      FROM DBA_TAB_PRIVS
+      WHERE GRANTEE='PUBLIC'
+      AND PRIVILEGE='EXECUTE'
+      AND TABLE_NAME IN ('DBMS_CRYPTO','DBMS_OBFUSCATION_TOOLKIT', 'DBMS_RANDOM');
+    "
+  else
+    query_string = "
+      SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
+  V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_TAB_PRIVS A
+      WHERE GRANTEE='PUBLIC'
+      AND PRIVILEGE='EXECUTE'
+      AND TABLE_NAME IN ('DBMS_CRYPTO','DBMS_OBFUSCATION_TOOLKIT', 'DBMS_RANDOM')
+      ORDER BY CON_ID, TABLE_NAME;
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'Public users should not be able to execute the `DBMS_CRYPTO`, `DBMS_OBFUSCATION_TOOLKIT` or `DBMS_RANDOM` packages -- list of Encryption packages with public execute privileges'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
+end

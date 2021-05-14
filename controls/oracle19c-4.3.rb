@@ -51,5 +51,27 @@ connect to both places to revoke.
   tag cis_level: 1
   tag cis_controls: ['16', 'Rev_6']
   tag cis_rid: '4.3'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  if !input('multitenant')
+    query_string = "
+      SELECT USERNAME FROM DBA_USERS WHERE AUTHENTICATION_TYPE = 'EXTERNAL';
+    "
+  else
+    query_string = "
+      SELECT A.USERNAME,
+      DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B
+       WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_USERS A
+      WHERE AUTHENTICATION_TYPE = 'EXTERNAL';
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'Users should not be able to authenticate via a remote OS -- for all users DBA_USERS.AUTHENTICATION_TYPE'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
+end

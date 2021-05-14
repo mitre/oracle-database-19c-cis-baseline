@@ -57,5 +57,13 @@ connect to both places to revoke.
   tag cis_level: 1
   tag cis_controls: ['14.6', 'Rev_7']
   tag cis_rid: '5.2.9'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query("SELECT GRANTEE,PRIVILEGE FROM CDB_SYS_PRIVS WHERE PRIVILEGE='BECOME USER' AND GRANTEE NOT IN (SELECT USERNAME FROM DBA_USERS WHERE ORACLE_MAINTAINED='Y') AND GRANTEE NOT IN (SELECT ROLE FROM DBA_ROLES WHERE ORACLE_MAINTAINED='Y');")
+
+  describe 'BUSER' do
+    subject { parameter }
+    it { should be_empty }
+  end
+end

@@ -37,5 +37,17 @@ password attacks quite difficult."
   tag cis_level: 1
   tag cis_controls: ['16', 'Rev_6']
   tag cis_rid: '2.2.9'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query(
+    "SELECT UPPER(VALUE)
+    FROM V$SYSTEM_PARAMETER
+    WHERE UPPER(NAME)='SEC_CASE_SENSITIVE_LOGON';"
+  ).column('upper(value)')
+
+  describe 'Passwords should be case sensitive -- SEC_CASE_SENSITIVE_LOGON' do
+    subject { parameter }
+    it { should cmp 'TRUE' }
+  end
+end

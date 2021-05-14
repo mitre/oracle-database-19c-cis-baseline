@@ -51,5 +51,32 @@ To assess this recommendation, execute the following SQL statement.
   tag cis_level: 1
   tag cis_controls: ['9', 'Rev_6']
   tag cis_rid: '2.2.5'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  if !input('multitenant')
+    query_string = "
+      SELECT UPPER(VALUE)
+      FROM V$SYSTEM_PARAMETER
+      WHERE UPPER(NAME)='REMOTE_LISTENER' AND VALUE IS NOT NULL;
+    "
+  else
+    query_string = "
+      SELECT DISTINCT UPPER(V.VALUE),
+      DECODE (V.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B
+       WHERE V.CON_ID = B.CON_ID))
+      FROM V$SYSTEM_PARAMETER V
+      WHERE UPPER(NAME) = 'REMOTE_LISTENER' AND VALUE IS NOT NULL;
+    "
+  end
+
+  parameter = sql.query(query_string).column('upper(value)')
+
+  describe 'Remote listener for connections to the database instance should not be permitted -- REMOTE_LISTENERS' do
+    subject { parameter }
+    #	it {should match ''}
+    it { should be_empty }
+  end
+end

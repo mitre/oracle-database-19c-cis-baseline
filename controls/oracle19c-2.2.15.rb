@@ -46,5 +46,23 @@ created per Appendix 7.
   tag cis_level: 1
   tag cis_controls: ['14.4', 'Rev_6']
   tag cis_rid: '2.2.15'
+
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query(
+    "SELECT A.KSPPINM, B.KSPPSTVL
+    FROM SYS.X_$KSPPI a, SYS.X_$KSPPCV b
+    WHERE A.INDX=B.INDX
+    AND A.KSPPINM LIKE '\\_\%trace_files_public' escape '\\';"
+  ).column('upper(value)')
+
+  describe.one do
+    describe parameter do
+      it { should be_empty }
+    end
+    describe parameter do
+      it { should be 'FALSE' }
+    end
+  end
 end
 

@@ -57,5 +57,31 @@ connect to both places to revoke.
   tag cis_level: 1
   tag cis_controls: ['14.6', 'Rev_7']
   tag cis_rid: '5.1.3.1'
+
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  if !input('multitenant')
+    query_string = "
+      SELECT GRANTEE, PRIVILEGE
+      FROM DBA_TAB_PRIVS
+      WHERE TABLE_NAME='AUD$'
+      AND OWNER = 'SYS';
+    "
+  else
+    query_string = "
+      SELECT GRANTEE, PRIVILEGE,
+      DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_TAB_PRIVS A
+      WHERE TABLE_NAME='AUD$'
+      AND OWNER = 'SYS';
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'Unauthorized grantees should not have access to SYS.AUD$ -- list of GRANTEES in AUD$'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
 end
 

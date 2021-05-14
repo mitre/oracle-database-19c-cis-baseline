@@ -67,5 +67,13 @@ using the `CREATE AUDIT POLICY` statement.
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.2.19'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query("WITH CIS_AUDIT(AUDIT_OPTION) AS (SELECT * FROM TABLE( DBMSOUTPUT_LINESARRAY('AUD$UNIFIED') ) ), AUDIT_ENABLED AS (SELECT DISTINCT OBJECT_NAME FROM AUDIT_UNIFIED_POLICIES AUD WHERE AUD.AUDIT_OPTION IN ('ALL') AND AUD.AUDIT_OPTION_TYPE = 'OBJECT ACTION' AND AUD.OBJECT_SCHEMA = 'AUDSYS' AND AUD.OBJECT_NAME = 'AUD$UNIFIED' AND EXISTS (SELECT * FROM AUDIT_UNIFIED_ENABLED_POLICIES ENABLED WHERE ENABLED.SUCCESS = 'YES' AND ENABLED.FAILURE = 'YES' AND ENABLED.ENABLED_OPTION = 'BY USER' AND ENABLED.ENTITY_NAME = 'ALL USERS' AND ENABLED.POLICY_NAME = AUD.POLICY_NAME) ) SELECT C.AUDIT_OPTION FROM CIS_AUDIT C LEFT JOIN AUDIT_ENABLED E ON C.AUDIT_OPTION = E.OBJECT_NAME WHERE E.OBJECT_NAME IS NULL;").column('audit_option')
+
+  describe 'AUDUNI' do
+    subject { parameter }
+    it { should be_empty }
+  end
+end

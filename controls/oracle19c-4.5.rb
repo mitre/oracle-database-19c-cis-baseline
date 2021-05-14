@@ -47,9 +47,32 @@ connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: [nil, 'Rev_4']
+  tag nist: ['SC-28', 'Rev_4']
   tag cis_level: 1
   tag cis_controls: ['16.14', 'Rev_6']
   tag cis_rid: '4.5'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  if !input('multitenant')
+    query_string = "
+      SELECT OWNER, TABLE_NAME
+      FROM DBA_TABLES
+      WHERE TABLE_NAME='USER$MIG' AND OWNER='SYS';
+    "
+  else
+    query_string = "
+      SELECT OWNER, TABLE_NAME,
+      DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_TABLES A
+      WHERE TABLE_NAME='USER$MIG' AND OWNER='SYS';
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'SYS.USER$MIG'  do
+    subject { parameter }
+    it { should be_empty }
+  end 
+end
