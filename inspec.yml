@@ -10,11 +10,11 @@ version: 0.1.0
 inputs:
   - name: user
     description: 'username Oracle DB'
-    value: oracleadmin
+    value: SYSTEM
 
   - name: password
     description: 'password Oracle DB'
-    value: oracleadmin
+    value: Oracle123
     sensitive: true
 
   - name: host
@@ -23,8 +23,12 @@ inputs:
 
   - name: service
     description: 'service name Oracle DB'
-    value: oracledb
+    value: MORAL
 
   - name: sqlplus_bin
     description: 'Location of sqlplus tool'
-    value: /path/to/sqlplus_bin
+    value: sqlplus
+
+  - name: multitenant
+    description: 'Flag to indicate whether the database is multi-tenant or single-tenant'
+    value: false
