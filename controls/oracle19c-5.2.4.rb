@@ -53,9 +53,26 @@ connect to both places to revoke.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  parameter = sql.query("SELECT GRANTEE,PRIVILEGE FROM CDB_SYS_PRIVS WHERE PRIVILEGE='EXECUTE ANY PROCEDURE' AND GRANTEE='DBSNMP';")
-
-  describe 'DBSMP' do
+  if !input('multitenant')
+    query_string = "
+    SELECT GRANTEE, PRIVILEGE
+    FROM DBA_SYS_PRIVS
+    WHERE PRIVILEGE='EXECUTE ANY PROCEDURE'
+    AND GRANTEE='DBSNMP';
+    "
+  else
+    query_string = "
+    SELECT GRANTEE, PRIVILEGE,
+    DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+     1,(SELECT NAME FROM V$DATABASE),
+     (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+    FROM CDB_SYS_PRIVS A
+    WHERE PRIVILEGE='EXECUTE ANY PROCEDURE'
+    AND GRANTEE='DBSNMP';
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'DBSNMP user should not be able to create procedures -- list of DBSNMP GRANTEES with `EXECUTE ANY PROCEDURE` privileges'  do
     subject { parameter }
     it { should be_empty }
   end

@@ -70,13 +70,33 @@ pluggable.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  parameter = sql.query("SELECT AUDIT_OPTION,SUCCESS,FAILURE FROM CDB_STMT_AUDIT_OPTS WHERE USER_NAME IS NULL
-			AND PROXY_NAME IS NULL
-			AND SUCCESS = 'BY ACCESS'
-			AND FAILURE = 'BY ACCESS'
-                        AND AUDIT_OPTION='CREATE SESSION';").column('audit_option')
-
-  describe 'CSAOS' do
+  if !input('multitenant')
+    query_string = "
+    SELECT AUDIT_OPTION,SUCCESS,FAILURE
+    FROM DBA_STMT_AUDIT_OPTS
+    WHERE USER_NAME IS NULL
+    AND PROXY_NAME IS NULL
+    AND SUCCESS = 'BY ACCESS'
+    AND FAILURE = 'BY ACCESS'
+    AND AUDIT_OPTION='CREATE SESSION';
+    "
+  else
+    query_string = "
+    SELECT AUDIT_OPTION,SUCCESS,FAILURE,
+     DECODE (A.CON_ID,
+     0,(SELECT NAME FROM V$DATABASE),
+     1,(SELECT NAME FROM V$DATABASE),
+     (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+    FROM CDB_STMT_AUDIT_OPTS A
+    WHERE USER_NAME IS NULL
+    AND PROXY_NAME IS NULL
+    AND SUCCESS = 'BY ACCESS'
+    AND FAILURE = 'BY ACCESS'
+    AND AUDIT_OPTION='CREATE SESSION';
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'CREATE SESSION audit option should be enabled -- CREATE SESSION AUDIT_OPTION'  do
     subject { parameter }
     it { should_not be_empty }
   end

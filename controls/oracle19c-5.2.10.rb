@@ -60,9 +60,30 @@ connect to both places to revoke.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  parameter = sql.query("SELECT GRANTEE,PRIVILEGE FROM CDB_SYS_PRIVS WHERE PRIVILEGE='CREATE PROCEDURE' AND GRANTEE NOT IN (SELECT USERNAME FROM DBA_USERS WHERE ORACLE_MAINTAINED='Y') AND GRANTEE NOT IN (SELECT ROLE FROM DBA_ROLES WHERE ORACLE_MAINTAINED='Y');")
-
-  describe 'CPRO' do
+  if !input('multitenant')
+    query_string = "
+    SELECT GRANTEE, PRIVILEGE
+    FROM DBA_SYS_PRIVS
+    WHERE PRIVILEGE='CREATE PROCEDURE'
+    AND GRANTEE NOT IN (SELECT USERNAME FROM DBA_USERS WHERE
+ORACLE_MAINTAINED='Y')
+    AND GRANTEE NOT IN (SELECT ROLE FROM DBA_ROLES WHERE ORACLE_MAINTAINED='Y');
+    "
+  else
+    query_string = "
+    SELECT GRANTEE, PRIVILEGE,
+    DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
+     1,(SELECT NAME FROM V$DATABASE),
+     (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+    FROM CDB_SYS_PRIVS A
+    WHERE PRIVILEGE='CREATE PROCEDURE'
+    AND GRANTEE NOT IN (SELECT USERNAME FROM CDB_USERS WHERE
+ORACLE_MAINTAINED='Y')
+    AND GRANTEE NOT IN (SELECT ROLE FROM CDB_ROLES WHERE ORACLE_MAINTAINED='Y');
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'Unauthorized users should not be able to create procedures -- list of GRANTEES with `CREATE PROCEDURE` privileges'  do
     subject { parameter }
     it { should be_empty }
   end

@@ -65,9 +65,33 @@ pluggable.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  parameter = sql.query("SELECT AUDIT_OPTION,SUCCESS,FAILURE FROM CDB_STMT_AUDIT_OPTS WHERE USER_NAME IS NULL AND PROXY_NAME IS NULL AND SUCCESS = 'BY ACCESS' AND FAILURE = 'BY ACCESS' AND AUDIT_OPTION='SYSTEM GRANT';").column('audit_option')
-
-  describe 'SGAO' do
+  if !input('multitenant')
+    query_string = "
+    SELECT AUDIT_OPTION,SUCCESS,FAILURE
+    FROM DBA_STMT_AUDIT_OPTS
+    WHERE USER_NAME IS NULL
+    AND PROXY_NAME IS NULL
+    AND SUCCESS = 'BY ACCESS'
+    AND FAILURE = 'BY ACCESS'
+    AND AUDIT_OPTION='SYSTEM GRANT';
+    "
+  else
+    query_string = "
+    SELECT AUDIT_OPTION,SUCCESS,FAILURE,
+     DECODE (A.CON_ID,
+     0,(SELECT NAME FROM V$DATABASE),
+     1,(SELECT NAME FROM V$DATABASE),
+     (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+    FROM CDB_STMT_AUDIT_OPTS A
+    WHERE USER_NAME IS NULL
+    AND PROXY_NAME IS NULL
+    AND SUCCESS = 'BY ACCESS'
+    AND FAILURE = 'BY ACCESS'
+    AND AUDIT_OPTION='SYSTEM GRANT';
+    "
+  end
+  parameter = sql.query(query_string)
+  describe 'SYSTEM GRANT audit option should be enabled -- SYSTEM GRANT AUDIT_OPTION'  do
     subject { parameter }
     it { should_not be_empty }
   end
