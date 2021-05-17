@@ -41,5 +41,14 @@ appropriate for your environment.
   tag cis_level: 1
   tag cis_controls: ['2', 'Rev_6']
   tag cis_rid: '1.1'
+
+  command = os.windows? ? 'opatch lsinventory | find \"' + input('version') + '"' : 'opatch lsinventory | grep -e "^.*' + input('version') + '\s*.*$"'
+
+  version = inspec.command(command)
+
+  describe 'Check Oracle installation version and patches' do
+    subject { version }
+    its('stdout') { should_not be_empty }
+  end
 end
 

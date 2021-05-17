@@ -48,13 +48,10 @@ module Inspec::Resources
         format_options = "set sqlformat csv\nSET FEEDBACK OFF"
       else
         @bin = "#{@sqlplus_bin} -S"
-        format_options = "SET PAGESIZE 32000\nSET FEEDBACK OFF\nSET UNDERLINE OFF"
+        format_options = "set markup csv on\nSET PAGESIZE 32000\nSET FEEDBACK OFF\nSET UNDERLINE OFF"
       end
-      puts "I'm in the local lib"
       command = command_builder(format_options, sql)
       inspec_cmd = inspec.command(command)
-      out = inspec_cmd.stdout + "\t" + inspec_cmd.stderr
-      puts out
       results = DatabaseHelper::SQLQueryResult.new(inspec_cmd, parse_csv_result(inspec_cmd.stdout))
       raise Inspec::Exceptions::ResourceFailed, "SQL query failed. Check your connection to the database." unless results.successful?
       return results
