@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.2' do
   title "Ensure 'AUDIT_TRAIL' Is Set to 'DB', 'XML', 'OS', 'DB,EXTENDED', or
 'XML,EXTENDED'"
@@ -21,7 +19,7 @@ should be set according to the needs of the organization."
     Ensure `VALUE` is set to `DB` or `OS` or `XML` or `DB,EXTENDED` or
 `XML,EXTENDED`.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute one of the following SQL statements and
 restart the instance.
     ```
@@ -40,13 +38,12 @@ restart the instance.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-6', 'Rev_4']
+  tag nist: %w(AU-6 Rev_4)
   tag cis_level: 1
-  tag cis_controls: ['6', 'Rev_6']
+  tag cis_controls: %w(6 Rev_6)
   tag cis_rid: '2.2.2'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
-
 
   parameter = sql.query(
     "SELECT UPPER(VALUE)
@@ -59,4 +56,3 @@ restart the instance.
     it { should be_in ['DB', 'XML', 'OS', 'DB,EXTENDED', 'XML,EXTENDED'] }
   end
 end
-

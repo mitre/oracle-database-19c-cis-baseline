@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.1.14' do
   title "Ensure the 'ALL' Audit Option on 'SYS.AUD$' Is Enabled"
   desc  "The logging of attempts to alter the audit trail in the `SYS.AUD$`
@@ -30,7 +28,7 @@ activities, this logging capability should be enabled."
     ```
     Lack of results implies a finding.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement in either
 the non multi-tenant or container database, it does NOT need run in the
 pluggable.
@@ -46,7 +44,7 @@ pluggable.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.1.14'

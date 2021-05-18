@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-5.1.2.1' do
   title "Ensure 'EXECUTE' is not granted to 'PUBLIC' on \"Non-default\"
 Packages"
@@ -14,7 +12,7 @@ transfer files from one database server to another.
 `DBMS_AQADM_SYS`, `DBMS_STREAMS_RPC`, `DBMS_PRVTAQIM`, `LTADM` and `DBMS_IJOB`
 packages are shipped as undocumented.
   "
-  desc  'rationale', "
+  desc 'rationale', "
     As described below, these \"non-default\" group of PL/SQL packages, which
 are not granted to `PUBLIC` by default, packages should not be granted to
 `PUBLIC`.
@@ -40,7 +38,7 @@ unprivileged users.
 using a different username to execute a database job. It allows a user to run
 database jobs in the context of another user.
   "
-  desc  'check', "
+  desc 'check', "
     **Non multi-tenant or pluggable database only:**
 
     To assess this recommendation, execute the following SQL statement.
@@ -77,7 +75,7 @@ V$DATABASE),
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to revoke.
@@ -103,15 +101,15 @@ connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-6', 'Rev_4']
+  tag nist: %w(AC-6 Rev_4)
   tag cis_level: 1
-  tag cis_controls: ['18', 'Rev_6']
+  tag cis_controls: %w(18 Rev_6)
   tag cis_rid: '5.1.2.1'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT TABLE_NAME, PRIVILEGE, GRANTEE
       FROM DBA_TAB_PRIVS
       WHERE GRANTEE='PUBLIC'
@@ -121,8 +119,8 @@ connect to both places to revoke.
       'DBMS_AQADM_SYS','DBMS_STREAMS_RPC','DBMS_PRVTAQIM','LTADM',
       'DBMS_IJOB','DBMS_PDB_EXEC_SQL');
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
   V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -136,10 +134,10 @@ connect to both places to revoke.
       'DBMS_IJOB','DBMS_PDB_EXEC_SQL')
       ORDER BY CON_ID, TABLE_NAME;
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Public users should not be able to execute the `DBMS_SYS_SQL`,`DBMS_REPCAT_SQL_UTL`, `INITJVMAUX`, `DBMS_AQADM_SYS`, `DBMS_STREAMS_RPC`, `DBMS_PRVTAQIM`, `LTADM` or `DBMS_IJOB` packages -- list of Non-default packages with public execute privileges'  do
+  describe 'Public users should not be able to execute the `DBMS_SYS_SQL`,`DBMS_REPCAT_SQL_UTL`, `INITJVMAUX`, `DBMS_AQADM_SYS`, `DBMS_STREAMS_RPC`, `DBMS_PRVTAQIM`, `LTADM` or `DBMS_IJOB` packages -- list of Non-default packages with public execute privileges' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end

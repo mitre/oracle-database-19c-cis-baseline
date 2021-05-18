@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-4.6' do
   title 'Ensure No Public Database Links Exist'
   desc  'Public Database links are used to allow connections between databases.'
@@ -27,7 +25,7 @@ To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to revoke.
@@ -50,12 +48,12 @@ connect to both places to revoke.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT DB_LINK, HOST FROM DBA_DB_LINKS WHERE OWNER = 'PUBLIC';
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT DB_LINK, HOST,
       DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -63,11 +61,10 @@ connect to both places to revoke.
       FROM CDB_DB_LINKS A
       WHERE OWNER = 'PUBLIC';
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Ensure no public database links exist -- DBA_DB_LINKS with PUBLIC owner'  do
+  describe 'Ensure no public database links exist -- DBA_DB_LINKS with PUBLIC owner' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end
-

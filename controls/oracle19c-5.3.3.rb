@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-5.3.3' do
   title "Ensure 'DBA' Is Revoked from Unauthorized 'GRANTEE'"
   desc  "The Oracle database `DBA` role is the default database administrator
@@ -47,7 +45,7 @@ execute the following SQL statement.
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to revoke.
@@ -63,23 +61,23 @@ connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['CM-6', 'Rev_4']
+  tag nist: %w(CM-6 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['5.1', 'Rev_6']
   tag cis_rid: '5.3.3'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT TABLE_NAME, PRIVILEGE, GRANTEE
       FROM DBA_TAB_PRIVS
       WHERE GRANTEE='PUBLIC'
       AND PRIVILEGE='EXECUTE'
       AND TABLE_NAME IN ('DBMS_ADVISOR','DBMS_LOB','UTL_FILE');
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
   V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -90,11 +88,10 @@ connect to both places to revoke.
       AND TABLE_NAME IN ('DBMS_ADVISOR','DBMS_LOB','UTL_FILE')
       ORDER BY CON_ID, TABLE_NAME;
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Public users should not be able to execute the `DBMS_ADVISOR`, `DBMS_LOB` or `UTL_FILE` packages -- list of File System packages with public execute privileges'  do
+  describe 'Public users should not be able to execute the `DBMS_ADVISOR`, `DBMS_LOB` or `UTL_FILE` packages -- list of File System packages with public execute privileges' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end
-

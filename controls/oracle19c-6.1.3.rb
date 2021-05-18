@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.1.3' do
   title "Ensure the 'SYSTEM GRANT' Audit Option Is Enabled"
   desc  "Enabling the audit option for the `SYSTEM GRANT` object causes
@@ -42,7 +40,7 @@ turned on. To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies a finding.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement in either
 the non multi-tenant or container database, it does NOT need run in the
 pluggable.
@@ -65,8 +63,8 @@ pluggable.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
     SELECT AUDIT_OPTION,SUCCESS,FAILURE
     FROM DBA_STMT_AUDIT_OPTS
     WHERE USER_NAME IS NULL
@@ -75,8 +73,8 @@ pluggable.
     AND FAILURE = 'BY ACCESS'
     AND AUDIT_OPTION='SYSTEM GRANT';
     "
-  else
-    query_string = "
+                 else
+                   "
     SELECT AUDIT_OPTION,SUCCESS,FAILURE,
      DECODE (A.CON_ID,
      0,(SELECT NAME FROM V$DATABASE),
@@ -89,9 +87,9 @@ pluggable.
     AND FAILURE = 'BY ACCESS'
     AND AUDIT_OPTION='SYSTEM GRANT';
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'SYSTEM GRANT audit option should be enabled -- SYSTEM GRANT AUDIT_OPTION'  do
+  describe 'SYSTEM GRANT audit option should be enabled -- SYSTEM GRANT AUDIT_OPTION' do
     subject { parameter }
     it { should_not be_empty }
   end

@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.1.11' do
   title "Ensure the 'GRANT ANY OBJECT PRIVILEGE' Audit Option Is Enabled"
   desc  "`GRANT ANY OBJECT PRIVILEGE` allows the user to grant or revoke any
@@ -42,7 +40,7 @@ turned on. To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies a finding.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this needs to be done in both container and pluggable database, you
 must connect to both places to do the audit statement.
@@ -58,15 +56,15 @@ must connect to both places to do the audit statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.1.11'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
     SELECT AUDIT_OPTION,SUCCESS,FAILURE
     FROM DBA_STMT_AUDIT_OPTS
     WHERE USER_NAME IS NULL
@@ -75,8 +73,8 @@ must connect to both places to do the audit statement.
     AND FAILURE = 'BY ACCESS'
     AND AUDIT_OPTION='GRANT ANY OBJECT PRIVILEGE';
     "
-  else
-    query_string = "
+                 else
+                   "
     SELECT AUDIT_OPTION,SUCCESS,FAILURE,
      DECODE (A.CON_ID,
      0,(SELECT NAME FROM V$DATABASE),
@@ -89,9 +87,9 @@ must connect to both places to do the audit statement.
     AND FAILURE = 'BY ACCESS'
     AND AUDIT_OPTION='GRANT ANY OBJECT PRIVILEGE';
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'GRANT ANY OBJECT PRIVILEGE audit option should be enabled -- GRANT ANY OBJECT PRIVILEGE AUDIT_OPTION'  do
+  describe 'GRANT ANY OBJECT PRIVILEGE audit option should be enabled -- GRANT ANY OBJECT PRIVILEGE AUDIT_OPTION' do
     subject { parameter }
     it { should_not be_empty }
   end

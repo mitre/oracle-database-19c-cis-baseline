@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.1.6' do
   title "Ensure the 'PUBLIC DATABASE LINK' Audit Option Is Enabled"
   desc  "The `PUBLIC DATABASE LINK` object allows for the creation of a public
@@ -43,7 +41,7 @@ turned on. To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies a finding.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement in either
 the non multi-tenant or container database, it does NOT need run in the
 pluggable.
@@ -59,15 +57,15 @@ pluggable.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.1.6'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
     SELECT AUDIT_OPTION,SUCCESS,FAILURE
     FROM DBA_STMT_AUDIT_OPTS
     WHERE USER_NAME IS NULL
@@ -76,8 +74,8 @@ pluggable.
     AND FAILURE = 'BY ACCESS'
     AND AUDIT_OPTION='PUBLIC DATABASE LINK';
     "
-  else
-    query_string = "
+                 else
+                   "
     SELECT AUDIT_OPTION,SUCCESS,FAILURE,
      DECODE (A.CON_ID,
      0,(SELECT NAME FROM V$DATABASE),
@@ -90,9 +88,9 @@ pluggable.
     AND FAILURE = 'BY ACCESS'
     AND AUDIT_OPTION='PUBLIC DATABASE LINK';
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'PUBLIC DATABASE LINK audit option should be enabled -- PUBLIC DATABASE LINK AUDIT_OPTION'  do
+  describe 'PUBLIC DATABASE LINK audit option should be enabled -- PUBLIC DATABASE LINK AUDIT_OPTION' do
     subject { parameter }
     it { should_not be_empty }
   end

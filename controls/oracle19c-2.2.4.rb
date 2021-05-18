@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.4' do
   title "Ensure 'OS_ROLES' Is Set to 'FALSE'"
   desc  "The `os_roles` setting permits externally created groups to be applied
@@ -30,7 +28,7 @@ To assess this recommendation, execute the following SQL statement.
     ```
     Ensure `VALUE` is set to `FALSE`.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
     ALTER SYSTEM SET OS_ROLES = FALSE SCOPE = SPFILE;
@@ -44,21 +42,21 @@ To assess this recommendation, execute the following SQL statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-2', 'Rev_4']
+  tag nist: %w(AC-2 Rev_4)
   tag cis_level: 1
-  tag cis_controls: ['16', 'Rev_6']
+  tag cis_controls: %w(16 Rev_6)
   tag cis_rid: '2.2.4'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT UPPER(VALUE)
       FROM V$SYSTEM_PARAMETER
       WHERE UPPER(NAME)='OS_ROLES';
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT DISTINCT UPPER(V.VALUE),
       DECODE (V.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -67,10 +65,10 @@ To assess this recommendation, execute the following SQL statement.
       FROM V$SYSTEM_PARAMETER V
       WHERE UPPER(NAME) = 'OS_ROLES';
     "
-  end
+                 end
 
   parameter = sql.query(query_string).column('upper(v.value)')
-  
+
   describe 'External groups should not be allowed for database management -- OS_ROLES' do
     subject { parameter }
     it { should cmp 'FALSE' }

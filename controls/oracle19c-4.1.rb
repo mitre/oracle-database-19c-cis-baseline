@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-4.1' do
   title 'Ensure All Default Passwords Are Changed'
   desc  'Default passwords should not be used by Oracle database users.'
@@ -48,7 +46,7 @@ to NONE, SYS account is effectively disabled. However, if you would like to
 change SYS password, then you will need to change remote_password_file to
 exclusive and then change SYS password.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to revoke.
@@ -85,15 +83,15 @@ changed.');
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT DISTINCT A.USERNAME
       FROM DBA_USERS_WITH_DEFPWD A, DBA_USERS B
       WHERE A.USERNAME = B.USERNAME
       AND B.ACCOUNT_STATUS = 'OPEN';
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT DISTINCT A.USERNAME,
       DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -102,11 +100,10 @@ changed.');
       WHERE A.USERNAME = C.USERNAME
       AND C.ACCOUNT_STATUS = 'OPEN';
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Default passwords should be changed -- profiles with default passwords'  do
+  describe 'Default passwords should be changed -- profiles with default passwords' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end
-

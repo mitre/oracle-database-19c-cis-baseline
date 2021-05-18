@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.3' do
   title "Ensure 'GLOBAL_NAMES' Is Set to 'TRUE'"
   desc  "The `global_names` setting requires that the name of a database link
@@ -32,7 +30,7 @@ To assess this recommendation, execute the following SQL statement.
     ```
     Ensure `VALUE` is set to `TRUE`.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
     ALTER SYSTEM SET GLOBAL_NAMES = TRUE SCOPE = SPFILE;
@@ -46,21 +44,21 @@ To assess this recommendation, execute the following SQL statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['SC-7', 'Rev_4']
+  tag nist: %w(SC-7 Rev_4)
   tag cis_level: 1
-  tag cis_controls: ['9', 'Rev_6']
+  tag cis_controls: %w(9 Rev_6)
   tag cis_rid: '2.2.3'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT UPPER(VALUE)
       FROM V$SYSTEM_PARAMETER
       WHERE UPPER(NAME)='GLOBAL_NAMES';
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT DISTINCT UPPER(V.VALUE),
       DECODE (V.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -69,13 +67,12 @@ To assess this recommendation, execute the following SQL statement.
       FROM V$SYSTEM_PARAMETER V
       WHERE UPPER(NAME) = 'GLOBAL_NAMES';
     "
-  end
+                 end
 
   parameter = sql.query(query_string).column('upper(value)')
-  
+
   describe 'Database connections should match the domain that is being called remotely -- GLOBAL_NAMES' do
     subject { parameter }
     it { should cmp 'TRUE' }
   end
 end
-

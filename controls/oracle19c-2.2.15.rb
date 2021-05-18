@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.15' do
   title "Ensure '_trace_files_public' Is Set to 'FALSE'"
   desc  "The `_trace_files_public` setting determines whether or not the
@@ -28,7 +26,7 @@ created per Appendix 7.
     WHERE NAME='_trace_files_public';
     ```
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
     ALTER SYSTEM SET \"_trace_files_public\" = FALSE SCOPE = SPFILE;
@@ -42,7 +40,7 @@ created per Appendix 7.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['SC-8', 'Rev_4']
+  tag nist: %w(SC-8 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['14.4', 'Rev_6']
   tag cis_rid: '2.2.15'
@@ -65,4 +63,3 @@ created per Appendix 7.
     end
   end
 end
-

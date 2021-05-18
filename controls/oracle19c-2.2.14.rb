@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.14' do
   title "Ensure 'SQL92_SECURITY' Is Set to 'TRUE'"
   desc  "The `SQL92_SECURITY` parameter setting `TRUE` requires that a user
@@ -34,7 +32,7 @@ To assess this recommendation, execute the following SQL statement.
     WHERE UPPER(NAME) = 'SQL92_SECURITY';
     ```
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
     ALTER SYSTEM SET SQL92_SECURITY = TRUE SCOPE = SPFILE;
@@ -48,21 +46,21 @@ To assess this recommendation, execute the following SQL statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-6', 'Rev_4']
+  tag nist: %w(AC-6 Rev_4)
   tag cis_level: 1
-  tag cis_controls: ['18', 'Rev_6']
+  tag cis_controls: %w(18 Rev_6)
   tag cis_rid: '2.2.14'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT UPPER(VALUE)
       FROM V$SYSTEM_PARAMETER
       WHERE UPPER(NAME)='SQL92_SECURITY';
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT DISTINCT UPPER(V.VALUE),
       DECODE (V.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -71,7 +69,7 @@ To assess this recommendation, execute the following SQL statement.
       FROM V$SYSTEM_PARAMETER V
       WHERE UPPER(NAME) = 'SQL92_SECURITY';
     "
-  end
+                 end
 
   parameter = sql.query(query_string).column('upper(value)')
 
@@ -80,4 +78,3 @@ To assess this recommendation, execute the following SQL statement.
     it { should cmp 'TRUE' }
   end
 end
-

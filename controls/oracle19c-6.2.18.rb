@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.2.18' do
   title "Ensure the 'SELECT ANY DICTIONARY' Privilege Audit Is Enabled"
   desc  "The `SELECT ANY DICTIONARY` system privilege allows the user to view
@@ -46,7 +44,7 @@ all user activities involving access to the database."
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     Execute the following SQL statement to remediate this setting.
     ```
     ALTER AUDIT POLICY CIS_UNIFIED_AUDIT_POLICY
@@ -65,7 +63,7 @@ using the `CREATE AUDIT POLICY` statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.2.18'
@@ -99,7 +97,7 @@ using the `CREATE AUDIT POLICY` statement.
   ")
 
   describe 'Ensure SELECT ANY DICTIONARY audit option is enabled -- SELECT ANY DICTIONARY Privilege Audit' do
-    subject { parameter}
+    subject { parameter }
     it { should be_empty }
   end
 end

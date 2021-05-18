@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-4.4' do
   title "Ensure No Users Are Assigned the 'DEFAULT' Profile"
   desc  "Upon creation database users are assigned to the `DEFAULT` profile
@@ -37,7 +35,7 @@ To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this recommendation, execute the following SQL statement for
 each user returned by the audit query using a functional-appropriate profile,
 keeping in mind if this is granted in both container and pluggable database,
@@ -54,23 +52,23 @@ you must connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-2', 'Rev_4']
+  tag nist: %w(AC-2 Rev_4)
   tag cis_level: 1
-  tag cis_controls: ['16', 'Rev_6']
+  tag cis_controls: %w(16 Rev_6)
   tag cis_rid: '4.4'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT USERNAME
       FROM DBA_USERS
       WHERE PROFILE='DEFAULT'
       AND ACCOUNT_STATUS='OPEN'
       AND ORACLE_MAINTAINED = 'N';
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT A.USERNAME,
       DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -80,10 +78,10 @@ you must connect to both places to revoke.
       AND A.ACCOUNT_STATUS='OPEN'
       AND A.ORACLE_MAINTAINED = 'N';
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'No users should be assigned to the default profile -- the list of users where PROFILE=DEFAULT'  do
+  describe 'No users should be assigned to the default profile -- the list of users where PROFILE=DEFAULT' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end

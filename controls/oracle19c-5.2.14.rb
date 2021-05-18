@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-5.2.14' do
   title "Ensure 'GRANT ANY OBJECT PRIVILEGE' Is Revoked from Unauthorized
 'GRANTEE'"
@@ -39,7 +37,7 @@ ORACLE_MAINTAINED='Y')
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to revoke.
@@ -55,15 +53,15 @@ connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['CM-6', 'Rev_4']
+  tag nist: %w(CM-6 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['5.1', 'Rev_6']
   tag cis_rid: '5.2.14'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
     SELECT GRANTEE, PRIVILEGE
     FROM DBA_SYS_PRIVS
     WHERE PRIVILEGE='GRANT ANY OBJECT PRIVILEGE'
@@ -71,8 +69,8 @@ connect to both places to revoke.
 ORACLE_MAINTAINED='Y')
     AND GRANTEE NOT IN (SELECT ROLE FROM DBA_ROLES WHERE ORACLE_MAINTAINED='Y');
     "
-  else
-    query_string = "
+                 else
+                   "
     SELECT GRANTEE, PRIVILEGE,
     DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
      1,(SELECT NAME FROM V$DATABASE),
@@ -83,9 +81,9 @@ ORACLE_MAINTAINED='Y')
 ORACLE_MAINTAINED='Y')
     AND GRANTEE NOT IN (SELECT ROLE FROM CDB_ROLES WHERE ORACLE_MAINTAINED='Y');
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Unauthorized users should not be able to grant access to objects -- list of GRANTEES with `GRANT ANY OBJECT PRIVILEGE` privileges'  do
+  describe 'Unauthorized users should not be able to grant access to objects -- list of GRANTEES with `GRANT ANY OBJECT PRIVILEGE` privileges' do
     subject { parameter }
     it { should be_empty }
   end

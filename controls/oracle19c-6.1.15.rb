@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.1.15' do
   title "Ensure the 'PROCEDURE' Audit Option Is Enabled"
   desc  "In this statement audit, `PROCEDURE` means any procedure, function,
@@ -46,7 +44,7 @@ turned on. To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies a finding.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement in either
 the non multi-tenant or container database, it does NOT need run in the
 pluggable.
@@ -62,15 +60,15 @@ pluggable.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.1.15'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
     SELECT AUDIT_OPTION,SUCCESS,FAILURE
     FROM DBA_STMT_AUDIT_OPTS
     WHERE USER_NAME IS NULL
@@ -79,8 +77,8 @@ pluggable.
     AND FAILURE = 'BY ACCESS'
     AND AUDIT_OPTION='PROCEDURE';
     "
-  else
-    query_string = "
+                 else
+                   "
     SELECT AUDIT_OPTION,SUCCESS,FAILURE,
      DECODE (A.CON_ID,
      0,(SELECT NAME FROM V$DATABASE),
@@ -93,9 +91,9 @@ pluggable.
     AND FAILURE = 'BY ACCESS'
     AND AUDIT_OPTION='PROCEDURE';
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'PROCEDURE audit option should be enabled -- PROCEDURE AUDIT_OPTION'  do
+  describe 'PROCEDURE audit option should be enabled -- PROCEDURE AUDIT_OPTION' do
     subject { parameter }
     it { should_not be_empty }
   end

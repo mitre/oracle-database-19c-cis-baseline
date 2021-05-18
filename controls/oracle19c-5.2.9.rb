@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-5.2.9' do
   title "Ensure 'BECOME USER' Is Revoked from Unauthorized 'GRANTEE'"
   desc  "The Oracle database `BECOME USER` privilege allows the designated user
@@ -37,7 +35,7 @@ ORACLE_MAINTAINED='Y')
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to revoke.
@@ -60,8 +58,8 @@ connect to both places to revoke.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
     SELECT GRANTEE, PRIVILEGE
     FROM DBA_SYS_PRIVS
     WHERE PRIVILEGE='BECOME USER'
@@ -69,8 +67,8 @@ connect to both places to revoke.
 ORACLE_MAINTAINED='Y')
     AND GRANTEE NOT IN (SELECT ROLE FROM DBA_ROLES WHERE ORACLE_MAINTAINED='Y');
     "
-  else
-    query_string = "
+                 else
+                   "
     SELECT GRANTEE, PRIVILEGE,
     DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
      1,(SELECT NAME FROM V$DATABASE),
@@ -81,9 +79,9 @@ ORACLE_MAINTAINED='Y')
 ORACLE_MAINTAINED='Y')
     AND GRANTEE NOT IN (SELECT ROLE FROM CDB_ROLES WHERE ORACLE_MAINTAINED='Y');
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Unauthorized users should not be able to become other users -- list of GRANTEES with `BECOME USER` privileges'  do
+  describe 'Unauthorized users should not be able to become other users -- list of GRANTEES with `BECOME USER` privileges' do
     subject { parameter }
     it { should be_empty }
   end

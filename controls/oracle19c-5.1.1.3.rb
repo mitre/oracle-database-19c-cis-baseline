@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-5.1.1.3' do
   title "Ensure 'EXECUTE' is revoked from 'PUBLIC' on \"Encryption\" Packages"
   desc  "As described below, Oracle Database PL/SQL \"Encryption\" packages -
@@ -17,7 +15,7 @@ the only two types available.
     - The Oracle database `DBMS_RANDOM` package is used for generating random
 numbers but should not be used for cryptographic purposes.
   "
-  desc  'rationale', "
+  desc 'rationale', "
     As described below, Oracle Database PL/SQL Encryption packages -
 `DBMS_CRYPTO`, `DBMS_OBFUSCATION_TOOLKIT` and `DBMS_RANDOM` – should not be
 granted to `PUBLIC`.
@@ -28,7 +26,7 @@ potentially harm data storage.
     - Use of the `DBMS_RANDOM` package can allow the unauthorized application
 of the random number-generating function.
   "
-  desc  'check', "
+  desc 'check', "
     **Non multi-tenant or pluggable database only:**
 
     To assess this recommendation, execute the following SQL statement.
@@ -59,7 +57,7 @@ V$DATABASE),
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to revoke.
@@ -77,23 +75,23 @@ connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['CM-6', 'Rev_4']
+  tag nist: %w(CM-6 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['5.1', 'Rev_6']
   tag cis_rid: '5.1.1.3'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT TABLE_NAME, PRIVILEGE, GRANTEE
       FROM DBA_TAB_PRIVS
       WHERE GRANTEE='PUBLIC'
       AND PRIVILEGE='EXECUTE'
       AND TABLE_NAME IN ('DBMS_CRYPTO','DBMS_OBFUSCATION_TOOLKIT', 'DBMS_RANDOM');
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
   V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -104,10 +102,10 @@ connect to both places to revoke.
       AND TABLE_NAME IN ('DBMS_CRYPTO','DBMS_OBFUSCATION_TOOLKIT', 'DBMS_RANDOM')
       ORDER BY CON_ID, TABLE_NAME;
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Public users should not be able to execute the `DBMS_CRYPTO`, `DBMS_OBFUSCATION_TOOLKIT` or `DBMS_RANDOM` packages -- list of Encryption packages with public execute privileges'  do
+  describe 'Public users should not be able to execute the `DBMS_CRYPTO`, `DBMS_OBFUSCATION_TOOLKIT` or `DBMS_RANDOM` packages -- list of Encryption packages with public execute privileges' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end

@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.2.22' do
   title "Ensure the 'DROP PROCEDURE/FUNCTION/PACKAGE/PACKAGE BODY' Action Audit
 Is Enabled"
@@ -48,7 +46,7 @@ PACKAGE','DROP PACKAGE BODY' )
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     Execute the following SQL statement to remediate this setting.
     ```
     ALTER AUDIT POLICY CIS_UNIFIED_AUDIT_POLICY
@@ -70,7 +68,7 @@ using the `CREATE AUDIT POLICY` statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.2.22'
@@ -106,7 +104,7 @@ PACKAGE','DROP PACKAGE BODY' )
   ")
 
   describe 'Ensure DROP PROCEDURE/FUNCTION/PACKAGE/PACKAGE BODY audit option is enabled -- DROP PROCEDURE/FUNCTION/PACKAGE/PACKAGE BODY Action Audit' do
-    subject { parameter}
+    subject { parameter }
     it { should be_empty }
   end
 end

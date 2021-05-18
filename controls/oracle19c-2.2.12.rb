@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.12' do
   title "Ensure 'SEC_PROTOCOL_ERROR_TRACE_ACTION' Is Set to 'LOG'"
   desc  "The `SEC_PROTOCOL_ERROR_TRACE_ACTION` setting determines the Oracle's
@@ -21,7 +19,7 @@ denial-of-service condition."
     ```
     Ensure `VALUE` is set to `LOG`.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
     ALTER SYSTEM SET SEC_PROTOCOL_ERROR_TRACE_ACTION=LOG SCOPE = SPFILE;
@@ -35,7 +33,7 @@ denial-of-service condition."
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '2.2.12'
@@ -50,7 +48,6 @@ denial-of-service condition."
 
   describe 'SEC_PROTOCOL_ERROR_TRACE_ACTION should log bad packets -- SEC_PROTOCOL_ERROR_TRACE_ACTION' do
     subject { parameter }
-    it { should cmp 'LOG'}
+    it { should cmp 'LOG' }
   end
 end
-

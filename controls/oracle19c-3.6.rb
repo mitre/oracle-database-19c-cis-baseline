@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-3.6' do
   title "Ensure 'PASSWORD_GRACE_TIME' Is Less than or Equal to '5'"
   desc  "The `PASSWORD_GRACE_TIME` setting determines how many days can pass
@@ -49,7 +47,7 @@ To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     Remediate this setting by executing the following SQL statement for each
 `PROFILE` returned by the audit procedure.
     ```
@@ -64,15 +62,15 @@ To assess this recommendation, execute the following SQL statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-2', 'Rev_4']
+  tag nist: %w(AC-2 Rev_4)
   tag cis_level: 1
-  tag cis_controls: ['16', 'Rev_6']
+  tag cis_controls: %w(16 Rev_6)
   tag cis_rid: '3.6'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT P.PROFILE, P.RESOURCE_NAME, P.LIMIT
       FROM DBA_PROFILES P
       WHERE TO_NUMBER(DECODE(P.LIMIT,
@@ -84,8 +82,8 @@ To assess this recommendation, execute the following SQL statement.
        P.RESOURCE_NAME = 'PASSWORD_GRACE_TIME' AND
        EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT P.PROFILE, P.RESOURCE_NAME, P.LIMIT,
       DECODE (P.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -103,11 +101,10 @@ To assess this recommendation, execute the following SQL statement.
       AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
       ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Passwords that expire without being changed should lock out the user after a short grace period -- profiles with PASSWORD_GRACE_TIME > 5'  do
+  describe 'Passwords that expire without being changed should lock out the user after a short grace period -- profiles with PASSWORD_GRACE_TIME > 5' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end
-

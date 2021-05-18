@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-5.1.1.4' do
   title "Ensure 'EXECUTE' is revoked from 'PUBLIC' on \"Java\" Packages"
   desc  "As described below, Oracle Database PL/SQL \"Java\" packages -
@@ -12,7 +10,7 @@ execute `DBMS_JAVA`.
 OS commands) or grant Java privileges. The user `PUBLIC` should not be able to
 execute `DBMS_JAVA_TEST`.
   "
-  desc  'rationale', "
+  desc 'rationale', "
     As described below, Oracle Database PL/SQL \"Java\" packages - `DBMS_JAVA`
 and `DBMS_JAVA_TEST` – should not be granted to `PUBLIC`.
     - The `DBMS_JAVA` package could allow an attacker to run OS commands from
@@ -20,7 +18,7 @@ the database.
     - The `DBMS_JAVA_TEST` package could allow an attacker to run operating
 system commands from the database.
   "
-  desc  'check', "
+  desc 'check', "
     **Non multi-tenant or pluggable database only:**
 
     To assess this recommendation, execute the following SQL statement.
@@ -51,7 +49,7 @@ V$DATABASE),
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to revoke.
@@ -68,23 +66,23 @@ connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['CM-6', 'Rev_4']
+  tag nist: %w(CM-6 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['5.1', 'Rev_6']
   tag cis_rid: '5.1.1.4'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT TABLE_NAME, PRIVILEGE, GRANTEE
       FROM DBA_TAB_PRIVS
       WHERE GRANTEE='PUBLIC'
       AND PRIVILEGE='EXECUTE'
       AND TABLE_NAME IN ('DBMS_JAVA','DBMS_JAVA_TEST');
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
   V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -95,10 +93,10 @@ connect to both places to revoke.
       AND TABLE_NAME IN ('DBMS_JAVA','DBMS_JAVA_TEST')
       ORDER BY CON_ID, TABLE_NAME;
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Public users should not be able to execute the `DBMS_JAVA` or `DBMS_JAVA_TEST` packages -- list of Java packages with public execute privileges'  do
+  describe 'Public users should not be able to execute the `DBMS_JAVA` or `DBMS_JAVA_TEST` packages -- list of Java packages with public execute privileges' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end

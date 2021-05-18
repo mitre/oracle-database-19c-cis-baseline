@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.2.23' do
   title "Ensure the 'ALTER SYSTEM' Privilege Audit Is Enabled"
   desc  "The `ALTER SYSTEM` privilege allows the user to change instance
@@ -44,7 +42,7 @@ all user activities that involve `ALTER SYSTEM` statements."
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     Execute the following SQL statement to remediate this setting.
     ```
     ALTER AUDIT POLICY CIS_UNIFIED_AUDIT_POLICY
@@ -63,7 +61,7 @@ using the `CREATE AUDIT POLICY` statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.2.23'
@@ -97,7 +95,7 @@ using the `CREATE AUDIT POLICY` statement.
   ")
 
   describe 'Ensure ALTER SYSTEM audit option is enabled -- ALTER SYSTEM Privilege Audit' do
-    subject { parameter}
+    subject { parameter }
     it { should be_empty }
   end
 end

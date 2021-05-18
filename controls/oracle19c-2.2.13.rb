@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.13' do
   title "Ensure 'SEC_RETURN_SERVER_RELEASE_BANNER' Is Set to 'FALSE'"
   desc  "The information about patch/update release number provides information
@@ -18,7 +16,7 @@ gain access based upon known patch weaknesses."
     ```
     Ensure `VALUE` is set to `FALSE`.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
     ALTER SYSTEM SET SEC_RETURN_SERVER_RELEASE_BANNER = FALSE SCOPE = SPFILE;
@@ -32,9 +30,9 @@ gain access based upon known patch weaknesses."
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['SC-7', 'Rev_4']
+  tag nist: %w(SC-7 Rev_4)
   tag cis_level: 1
-  tag cis_controls: ['9', 'Rev_6']
+  tag cis_controls: %w(9 Rev_6)
   tag cis_rid: '2.2.13'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))

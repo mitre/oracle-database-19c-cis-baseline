@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-5.2.4' do
   title "Ensure 'EXECUTE ANY PROCEDURE' Is Revoked from 'DBSNMP'"
   desc  'Remove unneeded `EXECUTE ANY PROCEDURE` privileges from `DBSNMP`.'
@@ -30,7 +28,7 @@ To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to revoke.
@@ -46,22 +44,22 @@ connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['CM-6', 'Rev_4']
+  tag nist: %w(CM-6 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['5.1', 'Rev_6']
   tag cis_rid: '5.2.4'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
     SELECT GRANTEE, PRIVILEGE
     FROM DBA_SYS_PRIVS
     WHERE PRIVILEGE='EXECUTE ANY PROCEDURE'
     AND GRANTEE='DBSNMP';
     "
-  else
-    query_string = "
+                 else
+                   "
     SELECT GRANTEE, PRIVILEGE,
     DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
      1,(SELECT NAME FROM V$DATABASE),
@@ -70,9 +68,9 @@ connect to both places to revoke.
     WHERE PRIVILEGE='EXECUTE ANY PROCEDURE'
     AND GRANTEE='DBSNMP';
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'DBSNMP user should not be able to create procedures -- list of DBSNMP GRANTEES with `EXECUTE ANY PROCEDURE` privileges'  do
+  describe 'DBSNMP user should not be able to create procedures -- list of DBSNMP GRANTEES with `EXECUTE ANY PROCEDURE` privileges' do
     subject { parameter }
     it { should be_empty }
   end

@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-3.8' do
   title "Ensure 'SESSIONS_PER_USER' Is Less than or Equal to '10'"
   desc  "The `SESSIONS_PER_USER` setting determines the maximum number of user
@@ -48,7 +46,7 @@ To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement for each
 `PROFILE` returned by the audit procedure.
     ```
@@ -63,15 +61,15 @@ To assess this recommendation, execute the following SQL statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-6', 'Rev_4']
+  tag nist: %w(AC-6 Rev_4)
   tag cis_level: 1
-  tag cis_controls: ['18', 'Rev_6']
+  tag cis_controls: %w(18 Rev_6)
   tag cis_rid: '3.8'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT P.PROFILE, P.RESOURCE_NAME, P.LIMIT
       FROM DBA_PROFILES P
       WHERE TO_NUMBER(DECODE(P.LIMIT,
@@ -83,8 +81,8 @@ To assess this recommendation, execute the following SQL statement.
       AND P.RESOURCE_NAME = 'SESSIONS_PER_USER'
       AND EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT P.PROFILE, P.RESOURCE_NAME, P.LIMIT,
       DECODE (P.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -102,11 +100,10 @@ To assess this recommendation, execute the following SQL statement.
       AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
       ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Users should have a limited number of maximum sessions at once -- profiles with SESSIONS_PER_USER > 10'  do
+  describe 'Users should have a limited number of maximum sessions at once -- profiles with SESSIONS_PER_USER > 10' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end
-

@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.1.1' do
   title "Ensure 'extproc' Is Not Present in 'listener.ora'"
   desc  "`extproc` should be removed from the `listener.ora` to mitigate the
@@ -21,7 +19,7 @@ appropriate for your Linux/Windows environment.
     ```
     Ensure `extproc` does not exist.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this recommendation:
 
     Remove `extproc` from the `listener.ora` file.
@@ -34,7 +32,7 @@ appropriate for your Linux/Windows environment.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-6', 'Rev_4']
+  tag nist: %w(AC-6 Rev_4)
   tag cis_level: 2
   tag cis_controls: ['18.9', 'Rev_6']
   tag cis_rid: '2.1.1'
@@ -46,4 +44,3 @@ appropriate for your Linux/Windows environment.
     its('content') { should_not match /extproc/i }
   end
 end
-

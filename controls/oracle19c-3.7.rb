@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-3.7' do
   title "Ensure 'PASSWORD_VERIFY_FUNCTION' Is Set for All Profiles"
   desc  "The `PASSWORD_VERIFY_FUNCTION` determines password settings
@@ -54,7 +52,7 @@ To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "Create a custom password verification function which fulfills
+  desc 'fix', "Create a custom password verification function which fulfills
 the password requirements of the organization."
   impact 0.5
   tag severity: 'medium'
@@ -64,15 +62,15 @@ the password requirements of the organization."
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-2', 'Rev_4']
+  tag nist: %w(AC-2 Rev_4)
   tag cis_level: 1
-  tag cis_controls: ['16', 'Rev_6']
+  tag cis_controls: %w(16 Rev_6)
   tag cis_rid: '3.7'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT P.PROFILE, P.RESOURCE_NAME, P.LIMIT
       FROM DBA_PROFILES P
       WHERE DECODE(P.LIMIT,
@@ -86,8 +84,8 @@ the password requirements of the organization."
        FROM DBA_USERS U
        WHERE U.PROFILE = P.PROFILE );
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT P.PROFILE, P.RESOURCE_NAME, P.LIMIT,
       DECODE (P.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -107,10 +105,10 @@ the password requirements of the organization."
        WHERE U.PROFILE = P.PROFILE )
       ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Passwords should have a verification function enabled to ensure complexity requirements -- profiles with PASSWORD_VERIFY_FUNCTION not set'  do
+  describe 'Passwords should have a verification function enabled to ensure complexity requirements -- profiles with PASSWORD_VERIFY_FUNCTION not set' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end

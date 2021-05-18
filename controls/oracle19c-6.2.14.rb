@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.2.14' do
   title "Ensure the 'DROP DATABASE LINK' Action Audit Is Enabled"
   desc  "Oracle database links are used to establish database-to-database
@@ -43,7 +41,7 @@ involving dropping database links."
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     Execute the following SQL statement to remediate this setting.
     ```
     ALTER AUDIT POLICY CIS_UNIFIED_AUDIT_POLICY
@@ -62,7 +60,7 @@ using the `CREATE AUDIT POLICY` statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['6.2', 'Rev_6']
   tag cis_rid: '6.2.14'
@@ -96,7 +94,7 @@ using the `CREATE AUDIT POLICY` statement.
   ")
 
   describe 'Ensure DROP DATABASE LINK audit option is enabled -- DROP DATABASE LINK Action Audit' do
-    subject { parameter}
+    subject { parameter }
     it { should be_empty }
   end
 end

@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.1.2' do
   title "Ensure 'ADMIN_RESTRICTIONS_<listener_name>' Is Set to 'ON'"
   desc  "The `admin_restrictions_`_`<listener_name>`_ setting in the
@@ -25,7 +23,7 @@ appropriate for your Linux/Windows environment.
     Ensure `admin_restrictions_`_`<listener_name>`_ is set to `ON` for all
 listeners.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this recommendation:
 
     Use a text editor such as `vi` to set the
@@ -39,7 +37,7 @@ listeners.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['CM-6', 'Rev_4']
+  tag nist: %w(CM-6 Rev_4)
   tag cis_level: 2
   tag cis_controls: ['5.1', 'Rev_6']
   tag cis_rid: '2.1.2'
@@ -51,4 +49,3 @@ listeners.
     its('content') { should match /^ADMIN_RESTRICTIONS.*=\s*on\s*$/i }
   end
 end
-

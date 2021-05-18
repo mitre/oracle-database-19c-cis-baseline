@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.10' do
   title "Ensure 'SEC_MAX_FAILED_LOGIN_ATTEMPTS' Is '3' or Less"
   desc  "The `SEC_MAX_FAILED_LOGIN_ATTEMPTS` parameter determines how many
@@ -16,7 +14,7 @@ denial-of-service."
     ```
     Ensure `VALUE` is set to `3`.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
     ALTER SYSTEM SET SEC_MAX_FAILED_LOGIN_ATTEMPTS = 3 SCOPE = SPFILE;
@@ -30,7 +28,7 @@ denial-of-service."
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-2', 'Rev_4']
+  tag nist: %w(AC-2 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['16.7', 'Rev_6']
   tag cis_rid: '2.2.10'
@@ -48,4 +46,3 @@ denial-of-service."
     it { should cmp <= 3 }
   end
 end
-

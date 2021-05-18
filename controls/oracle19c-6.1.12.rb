@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.1.12' do
   title "Ensure the 'GRANT ANY PRIVILEGE' Audit Option Is Enabled"
   desc  "`GRANT ANY PRIVILEGE` allows a user to grant any system privilege,
@@ -41,7 +39,7 @@ turned on. To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies a finding.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement in either
 the non multi-tenant or container database, it does NOT need run in the
 pluggable.
@@ -64,8 +62,8 @@ pluggable.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
     SELECT AUDIT_OPTION,SUCCESS,FAILURE
     FROM DBA_STMT_AUDIT_OPTS
     WHERE USER_NAME IS NULL
@@ -74,8 +72,8 @@ pluggable.
     AND FAILURE = 'BY ACCESS'
     AND AUDIT_OPTION='GRANT ANY PRIVILEGE';
     "
-  else
-    query_string = "
+                 else
+                   "
     SELECT AUDIT_OPTION,SUCCESS,FAILURE,
      DECODE (A.CON_ID,
      0,(SELECT NAME FROM V$DATABASE),
@@ -88,9 +86,9 @@ pluggable.
     AND FAILURE = 'BY ACCESS'
     AND AUDIT_OPTION='GRANT ANY PRIVILEGE';
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'GRANT ANY PRIVILEGE audit option should be enabled -- GRANT ANY PRIVILEGE AUDIT_OPTION'  do
+  describe 'GRANT ANY PRIVILEGE audit option should be enabled -- GRANT ANY PRIVILEGE AUDIT_OPTION' do
     subject { parameter }
     it { should_not be_empty }
   end

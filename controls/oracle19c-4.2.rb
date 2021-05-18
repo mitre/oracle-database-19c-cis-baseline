@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-4.2' do
   title 'Ensure All Sample Data And Users Have Been Removed'
   desc  "Oracle sample schemas can be used to create sample users
@@ -33,7 +31,7 @@ To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to run the drop script.
@@ -56,21 +54,21 @@ until the `recyclebin` is emptied.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-6', 'Rev_4']
+  tag nist: %w(AC-6 Rev_4)
   tag cis_level: 1
   tag cis_controls: ['18.9', 'Rev_6']
   tag cis_rid: '4.2'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  if !input('multitenant')
-    query_string = "
+  query_string = if !input('multitenant')
+                   "
       SELECT USERNAME
       FROM DBA_USERS
       WHERE USERNAME IN ('BI','HR','IX','OE','PM','SCOTT','SH');
     "
-  else
-    query_string = "
+                 else
+                   "
       SELECT DISTINCT A.USERNAME,
       DECODE (A.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -78,11 +76,10 @@ until the `recyclebin` is emptied.
       FROM CDB_USERS A
       WHERE A.USERNAME IN ('BI','HR','IX','OE','PM','SCOTT','SH');
     "
-  end
+                 end
   parameter = sql.query(query_string)
-  describe 'Sample data should be removed -- sample schema and users'  do
+  describe 'Sample data should be removed -- sample schema and users' do
     subject { parameter }
     it { should be_empty }
-  end 
+  end
 end
-
