@@ -49,14 +49,15 @@ To assess this recommendation, execute the following SQL statement.
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
 
-  query_string = if !input('multitenant')
-                   "
+  if !input('multitenant')
+    query_string = "
       SELECT UPPER(VALUE)
       FROM V$SYSTEM_PARAMETER
       WHERE UPPER(NAME)='OS_ROLES';
     "
-                 else
-                   "
+    val = 'upper(value)'
+  else
+    query_string = "
       SELECT DISTINCT UPPER(V.VALUE),
       DECODE (V.CON_ID,0,(SELECT NAME FROM V$DATABASE),
        1,(SELECT NAME FROM V$DATABASE),
@@ -65,9 +66,9 @@ To assess this recommendation, execute the following SQL statement.
       FROM V$SYSTEM_PARAMETER V
       WHERE UPPER(NAME) = 'OS_ROLES';
     "
-                 end
-
-  parameter = sql.query(query_string).column('upper(v.value)')
+    val = 'upper(v.value)'
+  end
+  parameter = sql.query(query_string).column(val)
 
   describe 'External groups should not be allowed for database management -- OS_ROLES' do
     subject { parameter }

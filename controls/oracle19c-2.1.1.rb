@@ -37,10 +37,9 @@ appropriate for your Linux/Windows environment.
   tag cis_controls: ['18.9', 'Rev_6']
   tag cis_rid: '2.1.1'
 
-  listener_file = os_env('ORACLE_HOME').content + '/network/admin/listener.ora'
-
   describe 'Extproc should not be present -- listener.ora' do
-    subject { file(listener_file) }
+    subject { file(input('listener_file')) }
+    its('content') { should_not be_nil }
     its('content') { should_not match /extproc/i }
   end
 end

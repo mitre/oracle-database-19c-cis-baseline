@@ -42,10 +42,9 @@ listeners.
   tag cis_controls: ['5.1', 'Rev_6']
   tag cis_rid: '2.1.2'
 
-  listener_file = os_env('ORACLE_HOME').content + '/network/admin/listener.ora'
-
   describe 'Admin restrictions should be enabled -- listener.ora' do
-    subject { file(listener_file) }
+    subject { file(input('listener_file')) }
+    its('content') { should_not be_nil }
     its('content') { should match /^ADMIN_RESTRICTIONS.*=\s*on\s*$/i }
   end
 end

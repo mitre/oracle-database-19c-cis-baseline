@@ -47,6 +47,6 @@ SPFILE;
 
   describe 'SEC_PROTOCOL_ERROR_FURTHER_ACTION should drop connections after three bad packets -- SEC_PROTOCOL_ERROR_FURTHER_ACTION' do
     subject { parameter }
-    it { should cmp '(DROP, 3)' }
+    it { should cmp '(DROP,3)' }
   end
 end

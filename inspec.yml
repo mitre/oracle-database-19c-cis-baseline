@@ -14,7 +14,7 @@ inputs:
 
   - name: password
     description: 'password Oracle DB'
-    value: Oracle123
+    value: Oradoc_db1
     sensitive: true
 
   - name: host
@@ -23,12 +23,20 @@ inputs:
 
   - name: service
     description: 'service name Oracle DB'
-    value: MORAL
+    value: ORCLCDB.localdomain
 
   - name: sqlplus_bin
     description: 'Location of sqlplus tool'
-    value: sqlplus
+    value: /u01/app/oracle/product/12.2.0/dbhome_1/bin/sqlplus
+
+  - name: listener_file
+    description: 'Location of listener.ora'
+    value: /u01/app/oracle/product/12.2.0/dbhome_1/admin/ORCLCDB/listener.ora
 
   - name: multitenant
     description: 'Flag to indicate whether the database is multi-tenant or single-tenant'
     value: false
+
+  - name: version
+    description: 'Expected version for Oracle database'
+    value: 12.2.0.1.0
