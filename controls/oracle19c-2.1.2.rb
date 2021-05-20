@@ -42,9 +42,22 @@ listeners.
   tag cis_controls: ['5.1', 'Rev_6']
   tag cis_rid: '2.1.2'
 
+  s = file(input('listener_file'))
+
   describe 'Admin restrictions should be enabled -- listener.ora' do
-    subject { file(input('listener_file')) }
+    subject { s }
     its('content') { should_not be_nil }
-    its('content') { should match /^ADMIN_RESTRICTIONS.*=\s*on\s*$/i }
+    listener_blocks = s.content.scan(/\((?>[^)(]+|\g<0>)*\)/i)
+    listener_blocks.each do |block|
+      describe 'Each LISTENER should have ADMIN RESTRICTIONS enabled -- ' do
+        subject { block }
+        puts block
+        it 'should be blah' do
+          failure_message = "Found listener without ADMIN RESTRICTIONS. Check #{input('')}"
+          expect(block).to match(/ADMIN_RESTRICTIONS.*\s*=\s*on/i), failure_message
+        end
+
+      end
+    end
   end
 end
