@@ -60,7 +60,7 @@ To assess this recommendation, execute the following SQL statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(AC-2 Rev_4)
+  tag nist: %w(AC-2 )
   tag cis_level: 1
   tag cis_controls: %w(16 Rev_6)
   tag cis_rid: '3.5'

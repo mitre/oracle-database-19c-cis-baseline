@@ -59,9 +59,9 @@ using the `CREATE AUDIT POLICY` statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(AU-12 Rev_4)
+  tag nist: %w(AU-12 )
   tag cis_level: 1
-  tag cis_controls: ['6.2', 'Rev_6']
+  tag cis_controls: ['6.2']
   tag cis_rid: '6.2.9'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))

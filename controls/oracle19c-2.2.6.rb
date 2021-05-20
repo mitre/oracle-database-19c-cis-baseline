@@ -30,7 +30,7 @@ Guard, `EXCLUSIVE` is an allowable VALUE.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(AC-2 Rev_4)
+  tag nist: %w(AC-2 )
   tag cis_level: 1
   tag cis_controls: %w(16 Rev_6)
   tag cis_rid: '2.2.6'
@@ -44,7 +44,7 @@ Guard, `EXCLUSIVE` is an allowable VALUE.
   ).column('upper(value)')
 
   describe 'Oracle should not use a password file during login -- REMOTE_LOGIN_PASSWORDFILE' do
-    subject { parameter }
+    subject { parameter.first }
     it { should be_in %w(NONE EXCLUSIVE) }
   end
 end

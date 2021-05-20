@@ -28,9 +28,9 @@ denial-of-service."
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(AC-2 Rev_4)
+  tag nist: %w(AC-2 )
   tag cis_level: 1
-  tag cis_controls: ['16.7', 'Rev_6']
+  tag cis_controls: ['16.7']
   tag cis_rid: '2.2.10'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
@@ -42,7 +42,7 @@ denial-of-service."
   ).column('upper(value)')
 
   describe 'SEC_MAX_FAILED_LOGIN_ATTEMPTS should be less than or equal to 3 -- SEC_MAX_FAILED_LOGIN_ATTEMPTS' do
-    subject { parameter }
+    subject { parameter.first }
     it { should cmp <= 3 }
   end
 end

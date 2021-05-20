@@ -44,9 +44,9 @@ To assess this recommendation, execute the following SQL statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(SC-8 Rev_4)
+  tag nist: %w(SC-8 )
   tag cis_level: 1
-  tag cis_controls: ['14.4', 'Rev_6']
+  tag cis_controls: ['14.4']
   tag cis_rid: '2.2.16'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
@@ -74,7 +74,7 @@ To assess this recommendation, execute the following SQL statement.
   parameter = sql.query(query_string).column(val)
 
   describe 'Resource limits should be set in database profiles -- RESOURCE_LIMIT' do
-    subject { parameter }
+    subject { parameter.first }
     it { should cmp 'TRUE' }
   end
 end

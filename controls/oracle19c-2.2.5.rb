@@ -45,7 +45,7 @@ To assess this recommendation, execute the following SQL statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(SC-7 Rev_4)
+  tag nist: %w(SC-7 )
   tag cis_level: 1
   tag cis_controls: %w(9 Rev_6)
   tag cis_rid: '2.2.5'

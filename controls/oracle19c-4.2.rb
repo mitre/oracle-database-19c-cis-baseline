@@ -54,9 +54,9 @@ until the `recyclebin` is emptied.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(AC-6 Rev_4)
+  tag nist: %w(AC-6 )
   tag cis_level: 1
-  tag cis_controls: ['18.9', 'Rev_6']
+  tag cis_controls: ['18.9']
   tag cis_rid: '4.2'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))

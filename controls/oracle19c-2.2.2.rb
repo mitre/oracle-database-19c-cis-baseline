@@ -38,7 +38,7 @@ restart the instance.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(AU-6 Rev_4)
+  tag nist: %w(AU-6 )
   tag cis_level: 1
   tag cis_controls: %w(6 Rev_6)
   tag cis_rid: '2.2.2'
@@ -52,7 +52,7 @@ restart the instance.
   ).column('upper(value)')
 
   describe 'Basic audit features should be enabled -- AUDIT_TRAIL' do
-    subject { parameter }
+    subject { parameter.first }
     it { should be_in ['DB', 'XML', 'OS', 'DB,EXTENDED', 'XML,EXTENDED'] }
   end
 end

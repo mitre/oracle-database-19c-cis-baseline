@@ -10,33 +10,46 @@ version: 0.1.0
 inputs:
   - name: user
     description: 'username Oracle DB'
-    value: SYSTEM
+    type: String
+    required: true
 
   - name: password
-    description: 'password Oracle DB'
-    value: Oradoc_db1
     sensitive: true
+    description: 'password Oracle DB'
+    type: String
+    required: true
 
   - name: host
     description: 'hostname Oracle DB'
-    value: 127.0.0.1
+    type: String
+    required: true
 
   - name: service
     description: 'service name Oracle DB'
-    value: ORCLCDB.localdomain
+    type: String
 
   - name: sqlplus_bin
-    description: 'Location of sqlplus tool'
-    value: /u01/app/oracle/product/12.2.0/dbhome_1/bin/sqlplus
+    description: 'Path of sqlplus binary on the runner'
+    type: String
+    required: true
 
   - name: listener_file
-    description: 'Location of listener.ora'
-    value: /u01/app/oracle/product/12.2.0/dbhome_1/admin/ORCLCDB/listener.ora
+    description: 'Path of listener.ora on the runner'
+    type: String
+    required: true
 
   - name: multitenant
     description: 'Flag to indicate whether the database is multi-tenant or single-tenant'
+    type: Boolean
+    required: true
     value: false
 
   - name: version
     description: 'Expected version for Oracle database'
-    value: 12.2.0.1.0
+    type: String
+    required: true
+
+  - name: listeners
+    description: 'Listener interfaces defined in listener.ora'
+    type: Array
+    required: true
