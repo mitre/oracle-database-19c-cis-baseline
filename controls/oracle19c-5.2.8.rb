@@ -50,9 +50,9 @@ connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(SC-8 Rev_4)
+  tag nist: %w(SC-8 )
   tag cis_level: 1
-  tag cis_controls: ['14.4', 'Rev_6']
+  tag cis_controls: ['14.4']
   tag cis_rid: '5.2.8'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))

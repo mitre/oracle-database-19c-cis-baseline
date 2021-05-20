@@ -46,7 +46,7 @@ To assess this recommendation, execute the following SQL statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(AC-6 Rev_4)
+  tag nist: %w(AC-6 )
   tag cis_level: 1
   tag cis_controls: %w(18 Rev_6)
   tag cis_rid: '2.2.14'
@@ -76,7 +76,7 @@ To assess this recommendation, execute the following SQL statement.
   parameter = sql.query(query_string).column(val)
 
   describe 'Database should not return patch/update release info -- SQL92_SECURITY' do
-    subject { parameter }
+    subject { parameter.first }
     it { should cmp 'TRUE' }
   end
 end

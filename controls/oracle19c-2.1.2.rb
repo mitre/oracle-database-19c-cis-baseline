@@ -37,14 +37,24 @@ listeners.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(CM-6 Rev_4)
+  tag nist: %w(CM-6 )
   tag cis_level: 2
-  tag cis_controls: ['5.1', 'Rev_6']
+  tag cis_controls: ['5.1']
   tag cis_rid: '2.1.2'
 
-  describe 'Admin restrictions should be enabled -- listener.ora' do
-    subject { file(input('listener_file')) }
-    its('content') { should_not be_nil }
-    its('content') { should match /^ADMIN_RESTRICTIONS.*=\s*on\s*$/i }
+  listener_file = file(input('listener_file'))
+
+  listeners = input('listeners')
+
+  describe 'The listener.ora file should exist' do
+    subject { listener_file }
+    it { should exist }
+  end
+
+  listeners.each do |listener|
+    describe "Admin restrictions should be enabled for listener #{listener} -- listener.ora" do
+      subject { listener_file }
+      its('content') { should match /ADMIN_RESTRICTIONS_#{listener}.*=\s*on\s*/i }
+    end
   end
 end

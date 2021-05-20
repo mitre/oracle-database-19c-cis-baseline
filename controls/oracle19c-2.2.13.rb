@@ -30,7 +30,7 @@ gain access based upon known patch weaknesses."
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(SC-7 Rev_4)
+  tag nist: %w(SC-7 )
   tag cis_level: 1
   tag cis_controls: %w(9 Rev_6)
   tag cis_rid: '2.2.13'
@@ -44,7 +44,7 @@ gain access based upon known patch weaknesses."
   ).column('upper(value)')
 
   describe 'Database should not return patch/update release info -- SEC_RETURN_SERVER_RELEASE_BANNER' do
-    subject { parameter }
+    subject { parameter.first }
     it { should cmp 'FALSE' }
   end
 end

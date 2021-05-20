@@ -42,7 +42,7 @@ To assess this recommendation, execute the following SQL statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(AC-2 Rev_4)
+  tag nist: %w(AC-2 )
   tag cis_level: 1
   tag cis_controls: %w(16 Rev_6)
   tag cis_rid: '2.2.4'
@@ -71,7 +71,7 @@ To assess this recommendation, execute the following SQL statement.
   parameter = sql.query(query_string).column(val)
 
   describe 'External groups should not be allowed for database management -- OS_ROLES' do
-    subject { parameter }
+    subject { parameter.first }
     it { should cmp 'FALSE' }
   end
 end

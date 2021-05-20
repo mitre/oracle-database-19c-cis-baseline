@@ -35,7 +35,7 @@ appropriate for your environment.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(SC-32 Rev_4)
+  tag nist: %w(SC-32 )
   tag cis_level: 1
   tag cis_controls: %w(2 Rev_6)
   tag cis_rid: '1.1'

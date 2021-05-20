@@ -32,9 +32,9 @@ the instance.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(AU-12 Rev_4)
+  tag nist: %w(AU-12 )
   tag cis_level: 1
-  tag cis_controls: ['6.2', 'Rev_6']
+  tag cis_controls: ['6.2']
   tag cis_rid: '2.2.1'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
@@ -46,7 +46,7 @@ the instance.
   ).column('upper(value)')
 
   describe 'AUDIT_SYS_OPERATIONS should be enabled -- AUDIT_SYS_OPERATIONS' do
-    subject { parameter }
+    subject { parameter.first }
     it { should cmp 'TRUE' }
   end
 end

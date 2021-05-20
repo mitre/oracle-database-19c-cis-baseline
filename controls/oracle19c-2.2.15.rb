@@ -40,9 +40,9 @@ created per Appendix 7.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(SC-8 Rev_4)
+  tag nist: %w(SC-8 )
   tag cis_level: 1
-  tag cis_controls: ['14.4', 'Rev_6']
+  tag cis_controls: ['14.4']
   tag cis_rid: '2.2.15'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
@@ -54,12 +54,25 @@ created per Appendix 7.
     AND A.KSPPINM LIKE '\\_\%trace_files_public' escape '\\';"
   ).column('upper(value)')
 
-  describe.one do
-    describe parameter do
-      it { should be_empty }
+  check_table = sql.query(
+    "SELECT table_name from all_tables where table_name='SYS.X_$KSPPI' OR table_name='SYS.X_$KSPPCV';"
+  )
+
+  if check_table.empty?
+    describe 'Tables SYS.X_$KSPPI and SYS.X_$KSPPCV do not exist -- therefore we are in compliance' do
+      subject { check_table.empty? }
+      it { should be true }
     end
-    describe parameter do
-      it { should be 'FALSE' }
+  else
+    describe.one do
+      describe 'Trace_files_public setting should not exist' do
+        subject { parameter }
+        it { should be_empty }
+      end
+      describe 'If trace_files_public setting does exist,' do
+        subject { parameter.first }
+        it { should be 'FALSE' }
+      end
     end
   end
 end

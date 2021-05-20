@@ -78,7 +78,7 @@ changed.');
   tag cci: nil
   tag nist: ['CM-2 (2)', 'Rev_4']
   tag cis_level: 1
-  tag cis_controls: ['5.3', 'Rev_6']
+  tag cis_controls: ['5.3']
   tag cis_rid: '4.1'
 
   sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))

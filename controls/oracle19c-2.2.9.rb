@@ -31,7 +31,7 @@ password attacks quite difficult."
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: %w(AC-2 Rev_4)
+  tag nist: %w(AC-2 )
   tag cis_level: 1
   tag cis_controls: %w(16 Rev_6)
   tag cis_rid: '2.2.9'
@@ -45,7 +45,7 @@ password attacks quite difficult."
   ).column('upper(value)')
 
   describe 'Passwords should be case sensitive -- SEC_CASE_SENSITIVE_LOGON' do
-    subject { parameter }
+    subject { parameter.first }
     it { should cmp 'TRUE' }
   end
 end
