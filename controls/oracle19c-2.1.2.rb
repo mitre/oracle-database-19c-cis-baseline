@@ -29,8 +29,8 @@ listeners.
     Use a text editor such as `vi` to set the
 `admin_restrictions_`_`<listener_name>`_ to the value `ON`.
   "
-  impact 0.7
-  tag severity: 'high'
+  impact 0.5
+  tag severity: 'medium'
   tag gtitle: nil
   tag gid: nil
   tag rid: nil

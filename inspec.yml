@@ -12,6 +12,7 @@ inputs:
     description: 'username Oracle DB'
     type: String
     required: true
+    value: 'SYSTEM'
 
   - name: password
     sensitive: true
@@ -27,16 +28,19 @@ inputs:
   - name: service
     description: 'service name Oracle DB'
     type: String
+    required: true
 
   - name: sqlplus_bin
     description: 'Path of sqlplus binary on the runner'
     type: String
     required: true
+    value: 'sqlplus'
 
   - name: listener_file
     description: 'Path of listener.ora on the runner'
     type: String
     required: true
+    value: '/opt/oracle/product/19c/dbhome_1/network/admin/listener.ora'
 
   - name: multitenant
     description: 'Flag to indicate whether the database is multi-tenant or single-tenant'
@@ -48,8 +52,11 @@ inputs:
     description: 'Expected version for Oracle database'
     type: String
     required: true
+    value: '19.0.0.0'
 
   - name: listeners
-    description: 'Listener interfaces defined in listener.ora'
+    description: 'List of listener interface names defined in listener.ora'
     type: Array
     required: true
+    value:
+      - 'LISTENER'

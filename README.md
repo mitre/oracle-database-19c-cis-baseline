@@ -48,9 +48,9 @@ inspec --version
 ```
 
 ### How to execute this instance  
-You can execute this profile against a remote target using the ssh transport, docker transport, or winrm transport of InSpec. You may also execute this profile directly on the host where InSpec is installed (see https://www.inspec.io/docs/reference/cli/). 
+This profile can be executed against a remote target using the ssh transport, docker transport, or winrm transport of InSpec. Profiles can also be executed directly on the host where InSpec is installed (see https://www.inspec.io/docs/reference/cli/). 
 
-It is highly encouraged to utilize the json or hdf reporters to allow you to export the results of a validation run (see the section on Heimdall below).
+It is highly encouraged to utilize the json or hdf reporters, which will export the results of a validation run to a format which can be ingested by a visualization tool (see the section on Heimdall below).
 
 #### Required Inputs
 You must specify inputs in an `inputs.yml` file. See `example_inputs.yml` in the profile root folder for a sample. Each input is required for proper execution of the profile.
@@ -65,8 +65,9 @@ multitenant: false
 version: '19.0.0.0.0'
 listeners: ['LISTENER']
 ```
+Some default values have been added to `inspec.yml`, but can be overridden by defining new values in `inputs.yml`. No default values have been given for database-specific connection variables like the password or the service name; these must be specified in the input file.
 ##### Note
-Environment variables will not be interpreted correctly in inputs.yml.
+Environment variables will not be interpreted correctly in `inputs.yml` or `inspec.yml`.
 Example:
 ```
 listener_file: $ORACLE_HOME/network/admin/listener.ora # $ORACLE_HOME will not be expanded out correctly!
@@ -85,7 +86,7 @@ inspec exec <path to profile on the host> --input-file=inputs.yml --reporter cli
 ```
 ## Using Heimdall for Viewing the JSON Results
 
-The JSON results output file can be loaded into __[heimdall-lite](https://heimdall-lite.mitre.org/)__ for a user-interactive, graphical view of the InSpec results. 
+The JSON `results.json` output file can be loaded into __[heimdall-lite](https://heimdall-lite.mitre.org/)__ for a user-interactive, graphical view of the InSpec results.
 
 The JSON InSpec results file may also be loaded into a __[full heimdall server](https://github.com/mitre/heimdall2)__, allowing for additional functionality such as to store and compare multiple profile runs.
 

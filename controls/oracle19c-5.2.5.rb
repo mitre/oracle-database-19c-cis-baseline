@@ -82,7 +82,7 @@ ORACLE_MAINTAINED='Y')
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Unauthorized users should not be able to seelct from access SSY schema objects -- list of GRANTEES with `SELECT ANY DICTIONARY` privileges' do
+  describe 'Unauthorized users should not be able to select from access SSY schema objects -- list of GRANTEES with `SELECT ANY DICTIONARY` privileges' do
     subject { parameter }
     it { should be_empty }
   end
