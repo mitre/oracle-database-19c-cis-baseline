@@ -50,8 +50,6 @@ inspec --version
 ### How to execute this instance  
 This profile can be executed against a remote target using the ssh transport, docker transport, or winrm transport of InSpec. Profiles can also be executed directly on the host where InSpec is installed (see https://www.inspec.io/docs/reference/cli/). 
 
-It is highly encouraged to utilize the json or hdf reporters, which will export the results of a validation run to a format which can be ingested by a visualization tool (see the section on Heimdall below).
-
 #### Required Inputs
 You must specify inputs in an `inputs.yml` file. See `example_inputs.yml` in the profile root folder for a sample. Each input is required for proper execution of the profile.
 ```yaml
@@ -72,23 +70,156 @@ Example:
 ```
 listener_file: $ORACLE_HOME/network/admin/listener.ora # $ORACLE_HOME will not be expanded out correctly!
 ```
-#### Execute All Controls in the Profile 
+#### Execute a single control in the profile 
+```bash
+inspec exec <path to profile on runner> --input-file=inputs.yml --controls=oracle19c-1.1 -t <target>
+```
+#### Execute a single control in the profile and save results as JSON
+```bash
+inspec exec <path to profile on runner> --input-file=inputs.yml --controls=<control id> -t <target> --reporter cli json:results.json
+```
+#### Execute all controls in the profile 
+```bash
+inspec exec <path to profile on runner> --input-file=inputs.yml -t <target>
+```
+#### Execute all controls in the profile and save results as JSON
 ```bash
 inspec exec <path to profile on runner> --input-file=inputs.yml -t <target> --reporter cli json:results.json
-```
-#### Execute a single Control in the Profile 
-```bash
-inspec exec <path to profile on runner> --input-file=inputs.yml --controls=oracle19c-1.1 -t <target> --reporter cli json:results.json
 ```
 #### Execute the profile directly on the Oracle database host
 ```bash
 inspec exec <path to profile on the host> --input-file=inputs.yml --reporter cli json:results.json
 ```
-## Using Heimdall for Viewing the JSON Results
+## Check Overview
 
-The JSON `results.json` output file can be loaded into __[heimdall-lite](https://heimdall-lite.mitre.org/)__ for a user-interactive, graphical view of the InSpec results.
+**Manual Checks**
 
-The JSON InSpec results file may also be loaded into a __[full heimdall server](https://github.com/mitre/heimdall2)__, allowing for additional functionality such as to store and compare multiple profile runs.
+This profile includes no manual checks.
+
+**Normal Checks**
+
+These checks will follow the normal automation process and will report accurate STIG compliance PASS/FAIL.
+
+| Check Number | Description                                                                                                                                                                                                               |
+|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1.1 | Ensure the Appropriate Version/Patches for Oracle Software Is Installed |
+| 3.1 | Ensure 'FAILED_LOGIN_ATTEMPTS' Is Less than or Equal to '5' |
+| 3.2 | Ensure 'PASSWORD_LOCK_TIME' Is Greater than or Equal to '1' |
+| 3.3 | Ensure 'PASSWORD_LIFE_TIME' Is Less than or Equal to '90' |
+| 3.4 | Ensure 'PASSWORD_REUSE_MAX' Is Greater than or Equal to '20' |
+| 3.5 | Ensure 'PASSWORD_REUSE_TIME' Is Greater than or Equal to '365' |
+| 3.6 | Ensure 'PASSWORD_GRACE_TIME' Is Less than or Equal to '5' |
+| 3.7 | Ensure 'PASSWORD_VERIFY_FUNCTION' Is Set for All Profiles |
+| 3.8 | Ensure 'SESSIONS_PER_USER' Is Less than or Equal to '10' |
+| 3.9 | Ensure 'INACTIVE_ACCOUNT_TIME' Is Less than or Equal to '120' |
+| 4.1 | Ensure All Default Passwords Are Changed |
+| 4.2 | Ensure All Sample Data And Users Have Been Removed |
+| 4.3 | Ensure 'DBA_USERS.AUTHENTICATION_TYPE' Is Not Set to 'EXTERNAL' for Any User |
+| 4.4 | Ensure No Users Are Assigned the 'DEFAULT' Profile |
+| 4.5 | Ensure 'SYS.USER$MIG' Has Been Dropped |
+| 4.6 | Ensure 'EXECUTE' is revoked from 'PUBLIC' on \"Network\" Packages |
+| 2.1.1 | Ensure 'extproc' Is Not Present in 'listener.ora' |
+| 2.1.2 | Ensure 'ADMIN_RESTRICTIONS_<listener_name>' Is Set to 'ON' |
+| 2.2.1 | Ensure 'AUDIT_SYS_OPERATIONS' Is Set to 'TRUE' |
+| 2.2.10 | Ensure 'SEC_MAX_FAILED_LOGIN_ATTEMPTS' Is '3' or Less |
+| 2.2.11 | Ensure 'SEC_PROTOCOL_ERROR_FURTHER_ACTION' Is Set to '(DROP,3)' |
+| 2.2.12 | Ensure 'SEC_PROTOCOL_ERROR_TRACE_ACTION' Is Set to 'LOG' |
+| 2.2.13 | Ensure 'SEC_RETURN_SERVER_RELEASE_BANNER' Is Set to 'FALSE' |
+| 2.2.14 | Ensure 'SQL92_SECURITY' Is Set to 'TRUE' |
+| 2.2.15 | Ensure '_trace_files_public' Is Set to 'FALSE' |
+| 2.2.16 | Ensure 'RESOURCE_LIMIT' Is Set to 'TRUE' |
+| 2.2.2 | Ensure 'AUDIT_TRAIL' Is Set to 'DB', 'XML', 'OS', 'DB,EXTENDED', or 'XML,EXTENDED' |
+| 2.2.3 | Ensure 'GLOBAL_NAMES' Is Set to 'TRUE' |
+| 2.2.4 | Ensure 'OS_ROLES' Is Set to 'FALSE' |
+| 2.2.5 | Ensure 'REMOTE_LISTENER' Is Empty |
+| 2.2.6 | Ensure 'REMOTE_LOGIN_PASSWORDFILE' Is Set to 'NONE' |
+| 2.2.7 | Ensure 'REMOTE_OS_AUTHENT' Is Set to 'FALSE' |
+| 2.2.8 | Ensure 'REMOTE_OS_ROLES' Is Set to 'FALSE' |
+| 2.2.9 | Ensure 'SEC_CASE_SENSITIVE_LOGON' Is Set to 'TRUE' |
+| 5.1.1.1 | Ensure 'EXECUTE' is revoked from 'PUBLIC' on \"Network\" Packages |
+| 5.1.1.2 | Ensure 'EXECUTE' is revoked from 'PUBLIC' on \"File System\" Packages |
+| 5.1.1.3 | Ensure 'EXECUTE' is revoked from 'PUBLIC' on \"Encryption\" Packages |
+| 5.1.1.4 | Ensure 'EXECUTE' is revoked from 'PUBLIC' on \"Java\" Packages |
+| 5.1.1.5 | Ensure 'EXECUTE' is revoked from 'PUBLIC' on \"Job Scheduler\"  Packages |
+| 5.1.1.6 | Ensure 'EXECUTE' is revoked from 'PUBLIC' on \"SQL Injection Helper\" Packages |
+| 5.1.2.1 | Ensure 'EXECUTE' is not granted to 'PUBLIC' on \"Non-default\" Packages |
+| 5.1.3.1 | Ensure 'ALL' Is Revoked from Unauthorized 'GRANTEE' on 'AUD$' |
+| 5.1.3.2 | Ensure 'ALL' Is Revoked from Unauthorized 'GRANTEE' on 'DBA_%' |
+| 5.1.3.3 | Ensure 'ALL' Is Revoked on 'Sensitive' Tables |
+| 5.2.1 | Ensure '%ANY%' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.10 | Ensure 'CREATE PROCEDURE' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.11 | Ensure 'ALTER SYSTEM' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.12 | Ensure 'CREATE ANY LIBRARY' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.13 | Ensure 'CREATE LIBRARY' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.14 | Ensure 'GRANT ANY OBJECT PRIVILEGE' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.15 | Ensure 'GRANT ANY ROLE' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.16 | Ensure 'GRANT ANY PRIVILEGE' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.2 | Ensure 'DBA_SYS_PRIVS.%' Is Revoked from Unauthorized 'GRANTEE' with 'ADMIN_OPTION' Set to 'YES' |
+| 5.2.3 | Ensure 'EXECUTE ANY PROCEDURE' Is Revoked from 'OUTLN' |
+| 5.2.4 | Ensure 'EXECUTE ANY PROCEDURE' Is Revoked from 'DBSNMP' |
+| 5.2.5 | Ensure 'SELECT ANY DICTIONARY' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.6 | Ensure 'SELECT ANY TABLE' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.7 | Ensure 'AUDIT SYSTEM' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.8 | Ensure 'EXEMPT ACCESS POLICY' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.2.9 | Ensure 'BECOME USER' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.3.1 | Ensure 'SELECT_CATALOG_ROLE' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.3.2 | Ensure 'EXECUTE_CATALOG_ROLE' Is Revoked from Unauthorized 'GRANTEE' |
+| 5.3.3 | Ensure 'DBA' Is Revoked from Unauthorized 'GRANTEE' |
+| 6.1.1 | Ensure the 'USER' Audit Option Is Enabled |
+| 6.1.10 | Ensure the 'SELECT ANY DICTIONARY' Audit Option Is Enabled |
+| 6.1.11 | Ensure the 'GRANT ANY OBJECT PRIVILEGE' Audit Option Is Enabled |
+| 6.1.12 | Ensure the 'GRANT ANY PRIVILEGE' Audit Option Is Enabled |
+| 6.1.13 | Ensure the 'DROP ANY PROCEDURE' Audit Option Is Enabled |
+| 6.1.14 | Ensure the 'ALL' Audit Option on 'SYS.AUD$' Is Enabled |
+| 6.1.15 | Ensure the 'PROCEDURE' Audit Option Is Enabled |
+| 6.1.16 | Ensure the 'ALTER SYSTEM' Audit Option Is Enabled |
+| 6.1.17 | Ensure the 'TRIGGER' Audit Option Is Enabled |
+| 6.1.18 | Ensure the 'CREATE SESSION' Audit Option Is Enabled |
+| 6.1.2 | Ensure the 'ROLE' Audit Option Is Enabled |
+| 6.1.3 | Ensure the 'SYSTEM GRANT' Audit Option Is Enabled |
+| 6.1.4 | Ensure the 'PROFILE' Audit Option Is Enabled |
+| 6.1.5 | Ensure the 'DATABASE LINK' Audit Option Is Enabled |
+| 6.1.6 | Ensure the 'PUBLIC DATABASE LINK' Audit Option Is Enabled |
+| 6.1.7 | Ensure the 'PUBLIC SYNONYM' Audit Option Is Enabled |
+| 6.1.8 | Ensure the 'SYNONYM' Audit Option Is Enabled |
+| 6.1.9 | Ensure the 'DIRECTORY' Audit Option Is Enabled |
+| 6.2.1 | Ensure the 'CREATE USER' Action Audit Is Enabled |
+| 6.2.10 | Ensure the 'ALTER PROFILE' Action Audit Is Enabled |
+| 6.2.11 | Ensure the 'DROP PROFILE' Action Audit Is Enabled |
+| 6.2.12 | Ensure the 'CREATE DATABASE LINK' Action Audit Is Enabled |
+| 6.2.13 | Ensure the 'ALTER DATABASE LINK' Action Audit Is Enabled |
+| 6.2.14 | Ensure the 'DROP DATABASE LINK' Action Audit Is Enabled |
+| 6.2.15 | Ensure the 'CREATE SYNONYM' Action Audit Is Enabled |
+| 6.2.16 | Ensure the 'ALTER SYNONYM' Action Audit Is Enabled |
+| 6.2.17 | Ensure the 'DROP SYNONYM' Action Audit Is Enabled |
+| 6.2.18 | Ensure the 'SELECT ANY DICTIONARY' Privilege Audit Is Enabled |
+| 6.2.19 | Ensure the 'AUDSYS.AUD$UNIFIED' Access Audit Is Enabled |
+| 6.2.2 | Ensure the 'ALTER USER' Action Audit Is Enabled |
+| 6.2.20 | Ensure the 'CREATE PROCEDURE/FUNCTION/PACKAGE/PACKAGE BODY' Action Audit Is Enabled |
+| 6.2.21 | Ensure the 'ALTER PROCEDURE/FUNCTION/PACKAGE/PACKAGE BODY' Action Audit Is Enabled |
+| 6.2.22 | Ensure the 'DROP PROCEDURE/FUNCTION/PACKAGE/PACKAGE BODY' Action Audit Is Enabled |
+| 6.2.23 | Ensure the 'ALTER SYSTEM' Privilege Audit Is Enabled |
+| 6.2.24 | Ensure the 'CREATE TRIGGER' Action Audit Is Enabled |
+| 6.2.25 | Ensure the  'ALTER TRIGGER' Action Audit IS Enabled |
+| 6.2.26 | Ensure the 'DROP TRIGGER' Action Audit Is Enabled |
+| 6.2.27 | Ensure the 'LOGON' AND 'LOGOFF' Actions Audit Is Enabled |
+| 6.2.3 | Ensure the 'DROP USER' Audit Option Is Enabled |
+| 6.2.4 | Ensure the 'CREATE ROLE' Action Audit Is Enabled |
+| 6.2.5 | Ensure the 'ALTER ROLE' Action Audit Is Enabled |
+| 6.2.6 | Ensure the 'DROP ROLE' Action Audit Is Enabled |
+| 6.2.7 | Ensure the 'GRANT' Action Audit Is Enabled |
+| 6.2.8 | Ensure the 'REVOKE' Action Audit Is Enabled |
+| 6.2.9 | Ensure the 'CREATE PROFILE' Action Audit Is Enabled |
+
+## Authors
+
+Defense Information Systems Agency (DISA) https://www.disa.mil/
+
+STIG support by DISA Risk Management Team and Cyber Exchange https://public.cyber.mil/
+
+## Legal Notices
+
+Copyright © 2020 Defense Information Systems Agency (DISA)
 
 ## Authors
 
