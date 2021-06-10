@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.15' do
   title "Ensure '_trace_files_public' Is Set to 'FALSE'"
   desc  "The `_trace_files_public` setting determines whether or not the
@@ -28,7 +26,7 @@ created per Appendix 7.
     WHERE NAME='_trace_files_public';
     ```
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
     ALTER SYSTEM SET \"_trace_files_public\" = FALSE SCOPE = SPFILE;
@@ -42,9 +40,39 @@ created per Appendix 7.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['SC-8', 'Rev_4']
+  tag nist: %w(SC-8 )
   tag cis_level: 1
-  tag cis_controls: ['14.4', 'Rev_6']
+  tag cis_controls: ['14.4']
   tag cis_rid: '2.2.15'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query(
+    "SELECT A.KSPPINM, B.KSPPSTVL
+    FROM SYS.X_$KSPPI a, SYS.X_$KSPPCV b
+    WHERE A.INDX=B.INDX
+    AND A.KSPPINM LIKE '\\_\%trace_files_public' escape '\\';"
+  ).column('upper(value)')
+
+  check_table = sql.query(
+    "SELECT table_name from all_tables where table_name='SYS.X_$KSPPI' OR table_name='SYS.X_$KSPPCV';"
+  )
+
+  if check_table.empty?
+    describe 'Tables SYS.X_$KSPPI and SYS.X_$KSPPCV do not exist -- therefore we are in compliance' do
+      subject { check_table.empty? }
+      it { should be true }
+    end
+  else
+    describe.one do
+      describe 'Trace_files_public setting should not exist' do
+        subject { parameter }
+        it { should be_empty }
+      end
+      describe 'If trace_files_public setting does exist,' do
+        subject { parameter.first }
+        it { should be 'FALSE' }
+      end
+    end
+  end
+end

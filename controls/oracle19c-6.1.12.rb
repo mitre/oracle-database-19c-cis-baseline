@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.1.12' do
   title "Ensure the 'GRANT ANY PRIVILEGE' Audit Option Is Enabled"
   desc  "`GRANT ANY PRIVILEGE` allows a user to grant any system privilege,
@@ -41,7 +39,7 @@ turned on. To assess this recommendation, execute the following SQL statement.
     ```
     Lack of results implies a finding.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement in either
 the non multi-tenant or container database, it does NOT need run in the
 pluggable.
@@ -59,7 +57,39 @@ pluggable.
   tag cci: nil
   tag nist: ['CM-6 (2)', 'Rev_4']
   tag cis_level: 1
-  tag cis_controls: ['5.4', 'Rev_6']
+  tag cis_controls: ['5.4']
   tag cis_rid: '6.1.12'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  query_string = if !input('multitenant')
+                   "
+    SELECT AUDIT_OPTION,SUCCESS,FAILURE
+    FROM DBA_STMT_AUDIT_OPTS
+    WHERE USER_NAME IS NULL
+    AND PROXY_NAME IS NULL
+    AND SUCCESS = 'BY ACCESS'
+    AND FAILURE = 'BY ACCESS'
+    AND AUDIT_OPTION='GRANT ANY PRIVILEGE';
+    "
+                 else
+                   "
+    SELECT AUDIT_OPTION,SUCCESS,FAILURE,
+     DECODE (A.CON_ID,
+     0,(SELECT NAME FROM V$DATABASE),
+     1,(SELECT NAME FROM V$DATABASE),
+     (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+    FROM CDB_STMT_AUDIT_OPTS A
+    WHERE USER_NAME IS NULL
+    AND PROXY_NAME IS NULL
+    AND SUCCESS = 'BY ACCESS'
+    AND FAILURE = 'BY ACCESS'
+    AND AUDIT_OPTION='GRANT ANY PRIVILEGE';
+    "
+                 end
+  parameter = sql.query(query_string)
+  describe 'GRANT ANY PRIVILEGE audit option should be enabled -- GRANT ANY PRIVILEGE AUDIT_OPTION' do
+    subject { parameter }
+    it { should_not be_empty }
+  end
+end

@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.11' do
   title "Ensure 'SEC_PROTOCOL_ERROR_FURTHER_ACTION' Is Set to '(DROP,3)'"
   desc  "The `SEC_PROTOCOL_ERROR_FURTHER_ACTION` setting determines the Oracle
@@ -19,7 +17,7 @@ value should be set according to the needs of the organization."
     ```
     Ensure `VALUE` is set to `(DROP,3)`.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
     ALTER SYSTEM SET SEC_PROTOCOL_ERROR_FURTHER_ACTION = '(DROP,3)' SCOPE =
@@ -34,9 +32,21 @@ SPFILE;
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-6', 'Rev_4']
+  tag nist: %w(AC-6 )
   tag cis_level: 1
-  tag cis_controls: ['18', 'Rev_6']
+  tag cis_controls: %w(18 Rev_6)
   tag cis_rid: '2.2.11'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query(
+    "SELECT UPPER(VALUE)
+    FROM V$SYSTEM_PARAMETER
+    WHERE UPPER(NAME)='SEC_PROTOCOL_ERROR_FURTHER_ACTION';"
+  ).column('upper(value)')
+
+  describe 'SEC_PROTOCOL_ERROR_FURTHER_ACTION should drop connections after three bad packets -- SEC_PROTOCOL_ERROR_FURTHER_ACTION' do
+    subject { parameter.first }
+    it { should cmp '(DROP,3)' }
+  end
+end

@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.9' do
   title "Ensure 'SEC_CASE_SENSITIVE_LOGON' Is Set to 'TRUE'"
   desc  "The `SEC_CASE_SENSITIVE_LOGON` information determines whether or not
@@ -19,7 +17,7 @@ password attacks quite difficult."
     ```
     Ensure `VALUE` is set to `TRUE`.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
     ALTER SYSTEM SET SEC_CASE_SENSITIVE_LOGON = TRUE SCOPE = SPFILE;
@@ -33,9 +31,21 @@ password attacks quite difficult."
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AC-2', 'Rev_4']
+  tag nist: %w(AC-2 )
   tag cis_level: 1
-  tag cis_controls: ['16', 'Rev_6']
+  tag cis_controls: %w(16 Rev_6)
   tag cis_rid: '2.2.9'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query(
+    "SELECT UPPER(VALUE)
+    FROM V$SYSTEM_PARAMETER
+    WHERE UPPER(NAME)='SEC_CASE_SENSITIVE_LOGON';"
+  ).column('upper(value)')
+
+  describe 'Passwords should be case sensitive -- SEC_CASE_SENSITIVE_LOGON' do
+    subject { parameter.first }
+    it { should cmp 'TRUE' }
+  end
+end

@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-5.1.1.1' do
   title "Ensure 'EXECUTE' is revoked from 'PUBLIC' on \"Network\" Packages"
   desc  "As described below, Oracle Database PL/SQL \"Network\" packages -
@@ -28,7 +26,7 @@ requests. This could be used to send information to the outside.
     - The Oracle database `HTTPURITYPE` object type can be used to perform HTTP
 requests.
   "
-  desc  'rationale', "
+  desc 'rationale', "
     As described below, Oracle Database PL/SQL packages - `DBMS_LDAP`,
 `UTL_INADDR`, `UTL_TCP`, `UTL_MAIL`, `UTL_SMTP`, `UTL_DBWS`, `UTL_ORAMTS`,
 `UTL_HTTP` and type `HTTPURITYPE` can be used by unauthorized users to create
@@ -60,7 +58,7 @@ the organization.
     - The ability to perform HTTP requests could be used to leak information
 from the database to an external destination.
   "
-  desc  'check', "
+  desc 'check', "
     **Non multi-tenant or pluggable database only:**
 
     To assess this recommendation, execute the following SQL statement.
@@ -94,7 +92,7 @@ V$DATABASE),
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement, keeping in
 mind if this is granted in both container and pluggable database, you must
 connect to both places to revoke.
@@ -118,9 +116,40 @@ connect to both places to revoke.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['CM-6', 'Rev_4']
+  tag nist: %w(CM-6 )
   tag cis_level: 1
-  tag cis_controls: ['5.1', 'Rev_6']
+  tag cis_controls: ['5.1']
   tag cis_rid: '5.1.1.1'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  query_string = if !input('multitenant')
+                   "
+      SELECT TABLE_NAME, PRIVILEGE, GRANTEE
+      FROM DBA_TAB_PRIVS
+      WHERE GRANTEE='PUBLIC'
+      AND PRIVILEGE='EXECUTE'
+      AND TABLE_NAME IN
+  ('DBMS_LDAP','UTL_INADDR','UTL_TCP','UTL_MAIL','UTL_SMTP','UTL_DBWS','UTL_ORAMTS','UTL_HTTP','HTTPURITYPE');
+    "
+                 else
+                   "
+      SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
+  V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID))
+      FROM CDB_TAB_PRIVS A
+      WHERE GRANTEE='PUBLIC'
+      AND PRIVILEGE='EXECUTE'
+      AND TABLE_NAME IN
+  ('DBMS_LDAP','UTL_INADDR','UTL_TCP','UTL_MAIL','UTL_SMTP','UTL_DBWS','UTL_ORAMTS','UTL_HTTP','HTTPURITYPE')
+      ORDER BY CON_ID, TABLE_NAME;
+    "
+                 end
+  parameter = sql.query(query_string)
+  describe 'Public users should not be able to execute the `DBMS_LDAP`, `UTL_INADDR`, `UTL_TCP`, `UTL_MAIL`, `UTL_SMTP`, `UTL_DBWS`,
+`UTL_ORAMTS`, `UTL_HTTP` or `HTTPURITYPE` packages -- list of Network packages with public execute privileges' do
+    subject { parameter }
+    it { should be_empty }
+  end
+end

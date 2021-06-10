@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-6.2.23' do
   title "Ensure the 'ALTER SYSTEM' Privilege Audit Is Enabled"
   desc  "The `ALTER SYSTEM` privilege allows the user to change instance
@@ -44,7 +42,7 @@ all user activities that involve `ALTER SYSTEM` statements."
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     Execute the following SQL statement to remediate this setting.
     ```
     ALTER AUDIT POLICY CIS_UNIFIED_AUDIT_POLICY
@@ -63,9 +61,41 @@ using the `CREATE AUDIT POLICY` statement.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 )
   tag cis_level: 1
-  tag cis_controls: ['6.2', 'Rev_6']
+  tag cis_controls: ['6.2']
   tag cis_rid: '6.2.23'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query("
+    WITH
+    CIS_AUDIT(AUDIT_OPTION) AS
+    (
+    SELECT * FROM TABLE( DBMSOUTPUT_LINESARRAY( 'ALTER SYSTEM' ) )
+    ),
+    AUDIT_ENABLED AS
+    ( SELECT DISTINCT AUDIT_OPTION
+     FROM AUDIT_UNIFIED_POLICIES AUD
+     WHERE AUD.AUDIT_OPTION IN ('ALTER SYSTEM' )
+     AND AUD.AUDIT_OPTION_TYPE = 'SYSTEM PRIVILEGE'
+     AND EXISTS (SELECT *
+     FROM AUDIT_UNIFIED_ENABLED_POLICIES ENABLED
+     WHERE ENABLED.SUCCESS = 'YES'
+     AND ENABLED.FAILURE = 'YES'
+     AND ENABLED.ENABLED_OPTION = 'BY USER'
+     AND ENABLED.ENTITY_NAME = 'ALL USERS'
+     AND ENABLED.POLICY_NAME = AUD.POLICY_NAME)
+    )
+    SELECT C.AUDIT_OPTION
+    FROM CIS_AUDIT C
+    LEFT JOIN AUDIT_ENABLED E
+    ON C.AUDIT_OPTION = E.AUDIT_OPTION
+    WHERE E.AUDIT_OPTION IS NULL;
+  ")
+
+  describe 'Ensure ALTER SYSTEM audit option is enabled -- ALTER SYSTEM Privilege Audit' do
+    subject { parameter }
+    it { should be_empty }
+  end
+end

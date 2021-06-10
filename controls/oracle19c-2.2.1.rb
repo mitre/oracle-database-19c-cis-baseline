@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-2.2.1' do
   title "Ensure 'AUDIT_SYS_OPERATIONS' Is Set to 'TRUE'"
   desc  "The `AUDIT_SYS_OPERATIONS` setting provides for the auditing of all
@@ -19,7 +17,7 @@ are not audited."
 
     Ensure `VALUE` is set to `TRUE`.
   "
-  desc  'fix', "
+  desc 'fix', "
     To remediate this setting, execute the following SQL statement and restart
 the instance.
     ```
@@ -34,9 +32,21 @@ the instance.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['AU-12', 'Rev_4']
+  tag nist: %w(AU-12 )
   tag cis_level: 1
-  tag cis_controls: ['6.2', 'Rev_6']
+  tag cis_controls: ['6.2']
   tag cis_rid: '2.2.1'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  parameter = sql.query(
+    "SELECT UPPER(VALUE)
+    FROM V$SYSTEM_PARAMETER
+    WHERE UPPER(NAME) = 'AUDIT_SYS_OPERATIONS';"
+  ).column('upper(value)')
+
+  describe 'AUDIT_SYS_OPERATIONS should be enabled -- AUDIT_SYS_OPERATIONS' do
+    subject { parameter.first }
+    it { should cmp 'TRUE' }
+  end
+end

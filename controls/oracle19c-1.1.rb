@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-1.1' do
   title "Ensure the Appropriate Version/Patches for Oracle Software Is
 Installed"
@@ -24,7 +22,7 @@ appropriate for your environment.
     opatch lsinventory | find \"<latest_patch_version_number>\"
     ```
   "
-  desc  'fix', "
+  desc 'fix', "
     Perform the following step for remediation:
 
     Download and apply the latest quarterly Critical Patch Update patches.
@@ -37,9 +35,17 @@ appropriate for your environment.
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['SC-32', 'Rev_4']
+  tag nist: %w(SC-32 )
   tag cis_level: 1
-  tag cis_controls: ['2', 'Rev_6']
+  tag cis_controls: %w(2 Rev_6)
   tag cis_rid: '1.1'
-end
 
+  command = os.windows? ? 'opatch lsinventory | find \"' + input('version') + '"' : 'opatch lsinventory | grep -e "^.*' + input('version') + '\s*.*$"'
+
+  version = inspec.command(command)
+
+  describe 'Check Oracle installation version and patches' do
+    subject { version }
+    its('stdout') { should_not be_empty }
+  end
+end

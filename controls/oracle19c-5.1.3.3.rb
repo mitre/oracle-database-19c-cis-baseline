@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 control 'oracle19c-5.1.3.3' do
   title "Ensure 'ALL' Is Revoked on 'Sensitive' Tables"
   desc  "The Oracle database tables listed below may contain sensitive
@@ -51,7 +49,7 @@ ORACLE_MAINTAINED='Y')
     ```
     Lack of results implies compliance.
   "
-  desc  'fix', "
+  desc 'fix', "
     Execute applicable SQLs listed below to remediate:
     ```
     REVOKE ALL ON SYS.CDB_LOCAL_ADMINAUTH$ FROM <grantee>;
@@ -75,9 +73,43 @@ ORACLE_MAINTAINED='Y')
   tag stig_id: nil
   tag fix_id: nil
   tag cci: nil
-  tag nist: ['CM-6', 'Rev_4']
+  tag nist: %w(CM-6 )
   tag cis_level: 1
-  tag cis_controls: ['5.1', 'Rev_6']
+  tag cis_controls: ['5.1']
   tag cis_rid: '5.1.3.3'
-end
 
+  sql = oracledb_session(user: input('user'), password: input('password'), host: input('host'), service: input('service'), sqlplus_bin: input('sqlplus_bin'))
+
+  query_string = if !input('multitenant')
+                   "
+      SELECT GRANTEE, PRIVILEGE, TABLE_NAME
+      FROM DBA_TAB_PRIVS
+      WHERE TABLE_NAME in
+  ('CDB_LOCAL_ADMINAUTH$','DEFAULT_PWD$','ENC$','HISTGRM$','HIST_HEAD$','LINK$','PDB_SYNC$','SCHEDULER$_CREDENTIAL','USER$','USER_HISTORY$','XS$VERIFIERS')
+      AND OWNER = 'SYS'
+      AND GRANTEE NOT IN (SELECT USERNAME FROM DBA_USERS WHERE
+  ORACLE_MAINTAINED='Y')
+      AND GRANTEE NOT IN (SELECT ROLE FROM DBA_ROLES WHERE ORACLE_MAINTAINED='Y');
+    "
+                 else
+                   "
+      SELECT TABLE_NAME, PRIVILEGE, GRANTEE,DECODE (A.CON_ID,0,(SELECT NAME FROM
+  V$DATABASE),
+       1,(SELECT NAME FROM V$DATABASE),
+       (SELECT NAME FROM V$PDBS B WHERE A.CON_ID = B.CON_ID)) DATABASE
+      FROM CDB_TAB_PRIVS A
+      WHERE TABLE_NAME in
+  ('CDB_LOCAL_ADMINAUTH$','DEFAULT_PWD$','ENC$','HISTGRM$','HIST_HEAD$','LINK$','PDB_SYNC$','SCHEDULER$_CREDENTIAL','USER$','USER_HISTORY$','XS$VERIFIERS')
+      AND OWNER = 'SYS'
+      AND GRANTEE NOT IN (SELECT USERNAME FROM DBA_USERS WHERE
+  ORACLE_MAINTAINED='Y')
+      AND GRANTEE NOT IN (SELECT ROLE FROM DBA_ROLES WHERE ORACLE_MAINTAINED='Y')
+      ORDER BY CON_ID, TABLE_NAME;
+    "
+                 end
+  parameter = sql.query(query_string)
+  describe 'Users should not have access to `CDB_LOCAL_ADMINAUTH$`,`DEFAULT_PWD$`,`ENC$`,`HISTGRM$`,`HIST_HEAD$`,`LINK$`,`PDB_SYNC$`,`SCHEDULER$_CREDENTIAL`,`USER$`,`USER_HISTORY$`,`XS$VERIFIERS` -- list of GRANTEES in Sensitive Tables' do
+    subject { parameter }
+    it { should be_empty }
+  end
+end
