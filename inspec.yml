@@ -1,7 +1,8 @@
 name: oracle-database-19c-cis-baseline
 title: Oracle Database 19c based on 19c CIS Benchmark
-maintainer: DISA DevSecOps Team
-copyright: Defense Information Systems Agency (DISA)
+maintainer: MITRE SAF Team
+copyright: MITRE, 2022
+copyright_email: saf@groups.mitre.org
 license: Apache-2.0
 summary: InSpec testing for baseline compliance with the Oracle 10c
 inspec_version: ">= 4.0"
