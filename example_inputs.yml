@@ -1,0 +1,9 @@
+user: 'SYSTEM'
+password: 'password'
+host: '127.0.0.1'
+service: 'ORCLCDB'
+sqlplus_bin: 'sqlplus'
+listener_file: /opt/oracle/product/19c/dbhome_1/network/admin/listener.ora
+multitenant: false
+version: '19.0.0.0.0'
+listeners: ['LISTENER']
