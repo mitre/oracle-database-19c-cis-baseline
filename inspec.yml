@@ -61,3 +61,31 @@ inputs:
     required: true
     value:
       - 'LISTENER'
+
+# oracle19c-2.2.10
+  - name: sec_max_failed_login_attempts
+    description: 'Number of maximum failed login attempts, in seconds'
+    type: Numeric
+    required:
+    value: 3
+
+# oracle19c-3.1
+  - name: failed_login_attempts
+    description: 'Number of failed login attemps'
+    type: Numeric
+    required:
+    value: 5
+
+# oracle19c-3.3
+  - name: password_life_time
+    description:
+    type: Numeric
+    required:
+    value: 90
+
+# oracle19c-3.8
+  - name: sessions_per_user
+    description:
+    type: Numeric
+    required:
+    value: 10
