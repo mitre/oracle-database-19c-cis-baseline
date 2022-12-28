@@ -1,5 +1,5 @@
 control 'oracle19c-2.2.10' do
-  title "Ensure 'SEC_MAX_FAILED_LOGIN_ATTEMPTS' Is '#{input('sec_max_failed_login_attempts')}' or Less"
+  title "Ensure 'SEC_MAX_FAILED_LOGIN_ATTEMPTS' Is '3' or Less"
   desc  "The `SEC_MAX_FAILED_LOGIN_ATTEMPTS` parameter determines how many
 failed login attempts are allowed before Oracle closes the login connection."
   desc  'rationale', "Allowing an unlimited number of login attempts for a user
@@ -12,12 +12,12 @@ denial-of-service."
     FROM V$SYSTEM_PARAMETER
     WHERE UPPER(NAME)='SEC_MAX_FAILED_LOGIN_ATTEMPTS';
     ```
-    Ensure `VALUE` is set to `#{input('sec_max_failed_login_attempts')}`.
+    Ensure `VALUE` is set to `3`.
   "
   desc 'fix', "
     To remediate this setting, execute the following SQL statement.
     ```
-    ALTER SYSTEM SET SEC_MAX_FAILED_LOGIN_ATTEMPTS = #{input('sec_max_failed_login_attempts')} SCOPE = SPFILE;
+    ALTER SYSTEM SET SEC_MAX_FAILED_LOGIN_ATTEMPTS = 3 SCOPE = SPFILE;
     ```
   "
   impact 0.5
@@ -41,8 +41,8 @@ denial-of-service."
     WHERE UPPER(NAME) = 'SEC_MAX_FAILED_LOGIN_ATTEMPTS';"
   ).column('upper(value)')
 
-  describe 'SEC_MAX_FAILED_LOGIN_ATTEMPTS should be less than or equal to #{input('sec_max_failed_login_attempts')} -- SEC_MAX_FAILED_LOGIN_ATTEMPTS' do
+  describe 'SEC_MAX_FAILED_LOGIN_ATTEMPTS should be less than or equal to 3 -- SEC_MAX_FAILED_LOGIN_ATTEMPTS' do
     subject { parameter.first }
-    it { should cmp <= #{input('sec_max_failed_login_attempts')} }
+    it { should cmp <= 3 }
   end
 end

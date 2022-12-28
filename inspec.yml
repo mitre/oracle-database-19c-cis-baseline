@@ -62,12 +62,6 @@ inputs:
     value:
       - 'LISTENER'
 
-# oracle19c-2.2.10
-  - name: sec_max_failed_login_attempts
-    description: 'Number of maximum failed login attempts, in seconds'
-    type: Numeric
-    value: 3
-
 # oracle19c-3.1
   - name: failed_login_attempts
     description: 'Number of failed login attemps'
@@ -85,3 +79,9 @@ inputs:
     description:
     type: Numeric
     value: 10
+
+# oracle19c-3.9
+  - name: inactive_account_time
+    description:
+    type: Numeric
+    value: 120

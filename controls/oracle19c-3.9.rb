@@ -1,8 +1,8 @@
 control 'oracle19c-3.9' do
-  title "Ensure 'INACTIVE_ACCOUNT_TIME' Is Less than or Equal to '120'"
+  title "Ensure 'INACTIVE_ACCOUNT_TIME' Is Less than or Equal to '#{input('inactive_account_time')}'"
   desc  "The 'INACTIVE_ACCOUNT_TIME' setting determines the maximum number of
 days of inactivity (no logins at all) after which the account will be locked.
-The suggested value for this is 120 or less."
+The suggested value for this is #{input('inactive_account_time')} or less."
   desc  'rationale', "Setting 'INACTIVE_ACCOUNT_TIME' can help with
 deactivation of \"inactive\" or \"unused\" accounts."
   desc  'check', "
@@ -18,7 +18,7 @@ DECODE(LIMIT,'UNLIMITED',9999,LIMIT)
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='INACTIVE_ACCOUNT_TIME'),
      'UNLIMITED','9999',
-     P.LIMIT)) > 120
+     P.LIMIT)) > #{input('inactive_account_time')}
     AND P.RESOURCE_NAME = 'INACTIVE_ACCOUNT_TIME'
     AND EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     ```
@@ -40,7 +40,7 @@ To assess this recommendation, execute the following SQL statement.
      AND RESOURCE_NAME='INACTIVE_ACCOUNT_TIME'
      AND CON_ID = P.CON_ID),
      'UNLIMITED','9999',
-     P.LIMIT)) > 120
+     P.LIMIT)) > #{input('inactive_account_time')}
     AND P.RESOURCE_NAME = 'INACTIVE_ACCOUNT_TIME'
     AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE );
     ```
@@ -50,7 +50,7 @@ To assess this recommendation, execute the following SQL statement.
     To remediate this setting, execute the following SQL statement for each
 `PROFILE` returned by the audit procedure.
     ```
-    ALTER PROFILE <profile_name> LIMIT INACTIVE_ACCOUNT_TIME 120;
+    ALTER PROFILE <profile_name> LIMIT INACTIVE_ACCOUNT_TIME #{input('inactive_account_time')};
     ```
   "
   impact 0.5
@@ -78,7 +78,7 @@ To assess this recommendation, execute the following SQL statement.
        WHERE PROFILE='DEFAULT'
        AND RESOURCE_NAME='INACTIVE_ACCOUNT_TIME'),
        'UNLIMITED','9999',
-       P.LIMIT)) > 120
+       P.LIMIT)) > #{input('inactive_account_time')}
       AND P.RESOURCE_NAME = 'INACTIVE_ACCOUNT_TIME'
       AND EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     "
@@ -97,13 +97,13 @@ To assess this recommendation, execute the following SQL statement.
        AND RESOURCE_NAME='INACTIVE_ACCOUNT_TIME'
        AND CON_ID = P.CON_ID),
        'UNLIMITED','9999',
-       P.LIMIT)) > 120
+       P.LIMIT)) > #{input('inactive_account_time')}
       AND P.RESOURCE_NAME = 'INACTIVE_ACCOUNT_TIME'
       AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE );
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Accounts should lock after a long enough stretch of inactivity -- profiles with INACTIVE_ACCOUNT_TIME < 120' do
+  describe 'Accounts should lock after a long enough stretch of inactivity -- profiles with INACTIVE_ACCOUNT_TIME < #{input('inactive_account_time')}' do
     subject { parameter }
     it { should be_empty }
   end
