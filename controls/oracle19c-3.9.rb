@@ -103,7 +103,7 @@ To assess this recommendation, execute the following SQL statement.
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Accounts should lock after a long enough stretch of inactivity -- profiles with INACTIVE_ACCOUNT_TIME < #{input('inactive_account_time')}' do
+  describe "Accounts should lock after a long enough stretch of inactivity -- profiles with INACTIVE_ACCOUNT_TIME < #{input('inactive_account_time')}" do
     subject { parameter }
     it { should be_empty }
   end
