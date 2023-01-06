@@ -2,7 +2,7 @@ control 'oracle19c-3.2' do
   title "Ensure 'PASSWORD_LOCK_TIME' Is Greater than or Equal to '#{input('password_lock_time')}'"
   desc  "The `PASSWORD_LOCK_TIME` setting determines how many days must pass
 for the user's account to be unlocked after the set number of failed login
-attempts has occurred. The suggested value for this is one day or greater."
+attempts has occurred. The suggested value for this is #{input('password_lock_time')} day or greater."
   desc  'rationale', "Locking the user account after repeated failed login
 attempts can block further brute-force login attacks, but can create
 administrative headaches as this account unlocking process always requires DBA
@@ -105,7 +105,7 @@ To assess this recommendation, execute the following SQL statement.
     "
                  end
   parameter = sql.query(query_string)
-  describe "Ensure locktime of at least one day for each profile password after a lockout -- profiles with PASSWORD_LOCK_TIME < #{input('password_lock_time')}" do
+  describe "Ensure locktime of at least #{input('password_lock_time')} day for each profile password after a lockout -- profiles with PASSWORD_LOCK_TIME < #{input('password_lock_time')}" do
     subject { parameter }
     it { should be_empty }
   end
