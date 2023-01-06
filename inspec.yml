@@ -76,7 +76,7 @@ inputs:
 
 # oracle19c-3.3
   - name: password_life_time
-    description:
+    description: 'Number of days after which passwords are required to be changed'
     type: Numeric
     value: 90
 
