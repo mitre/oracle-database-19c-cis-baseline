@@ -103,7 +103,7 @@ PROFILE returned by the audit procedure.
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Passwords for all profiles should be set to change frequently -- profiles with PASSWORD_LIFE_TIME > #{input('password_life_time')}' do
+  describe "Passwords for all profiles should be set to change frequently -- profiles with PASSWORD_LIFE_TIME > #{input('password_life_time')}" do
     subject { parameter }
     it { should be_empty }
   end
