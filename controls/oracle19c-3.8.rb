@@ -2,7 +2,7 @@ control 'oracle19c-3.8' do
   title "Ensure 'SESSIONS_PER_USER' Is Less than or Equal to '#{input('sessions_per_user')}'"
   desc  "The `SESSIONS_PER_USER` setting determines the maximum number of user
 sessions that are allowed to be open concurrently. The suggested value for this
-is 10 or less."
+is #{input('sessions_per_user')} or less."
   desc  'rationale', "Limiting the number of the `SESSIONS_PER_USER` can help
 prevent memory resource exhaustion by poorly formed requests or intentional
 denial-of-service attacks."
