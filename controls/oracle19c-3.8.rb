@@ -102,7 +102,7 @@ To assess this recommendation, execute the following SQL statement.
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Users should have a limited number of maximum sessions at once -- profiles with SESSIONS_PER_USER > #{input('sessions_per_user')}' do
+  describe "Users should have a limited number of maximum sessions at once -- profiles with SESSIONS_PER_USER > #{input('sessions_per_user')}" do
     subject { parameter }
     it { should be_empty }
   end
