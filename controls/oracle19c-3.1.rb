@@ -108,7 +108,7 @@ To assess this recommendation, execute the following SQL statement.
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Limit maximum failed login attempts for each profile -- profiles with FAILED_LOGIN_ATTEMPTS > #{input('failed_login_attempts')}' do
+  describe "Limit maximum failed login attempts for each profile -- profiles with FAILED_LOGIN_ATTEMPTS > #{input('failed_login_attempts')}" do
     subject { parameter }
     it { should be_empty }
   end
