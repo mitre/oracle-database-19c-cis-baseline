@@ -88,6 +88,6 @@ inputs:
 
 # oracle19c-3.9
   - name: inactive_account_time
-    description:
+    description: 'Number of days of inactivity after which account is locked'
     type: Numeric
     value: 120
