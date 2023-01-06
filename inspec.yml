@@ -64,7 +64,7 @@ inputs:
 
 # oracle19c-3.1
   - name: failed_login_attempts
-    description: 'Number of failed login attemps'
+    description: 'Number of failed login attempts'
     type: Numeric
     value: 5
 
