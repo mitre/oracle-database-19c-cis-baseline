@@ -80,6 +80,12 @@ inputs:
     type: Numeric
     value: 90
 
+# oracle19c-3.6
+  - name: password_grace_time
+    description: 'Number of days that can pass after password expiration before account lockout'
+    type: Numeric
+    value: 5
+
 # oracle19c-3.8
   - name: sessions_per_user
     description: 'Number of concurrent sessions allowed'
