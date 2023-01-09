@@ -80,6 +80,12 @@ inputs:
     type: Numeric
     value: 90
 
+# oracle19c-3.4
+  - name: password_reuse_max
+    description: 'Number of password changes required before the current password can be reused. Acceptable values are any integer or "UNLIMITED" to disallow reuse'
+    type: String
+    value: '20'
+
 # oracle19c-3.6
   - name: password_grace_time
     description: 'Number of days that can pass after password expiration before account lockout'
