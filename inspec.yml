@@ -70,9 +70,9 @@ inputs:
 
 # oracle19c-3.2
   - name: password_lock_time
-    description: 'Number of days that user accounts are locked after set number of failed login attempts'
-    type: Numeric
-    value: 1
+    description: 'Number of days that user accounts are locked after set number of failed login attempts. Acceptable values are any number, fraction, decimal, or "UNLIMITED"'
+    type: String
+    value: '1'
 
 # oracle19c-3.3
   - name: password_life_time
