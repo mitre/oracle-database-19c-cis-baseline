@@ -10,6 +10,7 @@ version: 1.0.1
 
 inputs:
   - name: user
+    sensitive: true
     description: 'username Oracle DB'
     type: String
     required: true
@@ -22,11 +23,13 @@ inputs:
     required: true
 
   - name: host
+    sensitive: true
     description: 'hostname Oracle DB'
     type: String
     required: true
 
   - name: service
+    sensitive: true
     description: 'service name Oracle DB'
     type: String
     required: true
