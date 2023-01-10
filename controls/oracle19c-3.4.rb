@@ -1,8 +1,8 @@
 control 'oracle19c-3.4' do
-  title "Ensure 'PASSWORD_REUSE_MAX' Is Greater than or Equal to '20'"
+  title "Ensure 'PASSWORD_REUSE_MAX' Is Greater than or Equal to '#{input('password_reuse_max')}'"
   desc  "The `PASSWORD_REUSE_MAX` setting determines how many different
 passwords must be used before the user is allowed to reuse a prior password.
-The suggested value for this is 20 passwords or greater."
+The suggested value for this is #{input('password_reuse_max')} passwords or greater."
   desc  'rationale', "Allowing reuse of a password within a short period of
 time after the password's initial use can make the success of both
 social-engineering and brute-force password-based attacks more likely."
@@ -18,7 +18,7 @@ social-engineering and brute-force password-based attacks more likely."
      FROM DBA_PROFILES
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='PASSWORD_REUSE_MAX'),
-     'UNLIMITED','9999',P.LIMIT)) < 20 AND
+     'UNLIMITED','9999',P.LIMIT)) < #{ input('password_reuse_max') == 'UNLIMITED'? '9999' : input('password_reuse_max') } AND
      P.RESOURCE_NAME = 'PASSWORD_REUSE_MAX' AND
      EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     ```
@@ -39,7 +39,7 @@ To assess this recommendation, execute the following SQL statement.
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='PASSWORD_REUSE_MAX'
      AND CON_ID = P.CON_ID),
-     'UNLIMITED','9999',P.LIMIT)) < 20
+     'UNLIMITED','9999',P.LIMIT)) < #{ input('password_reuse_max') == 'UNLIMITED'? '9999' : input('password_reuse_max') }
     AND P.RESOURCE_NAME = 'PASSWORD_REUSE_MAX'
     AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
     ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
@@ -50,7 +50,7 @@ To assess this recommendation, execute the following SQL statement.
     Remediate this setting by executing the following SQL statement for each
 `PROFILE` returned by the audit procedure.
     ```
-    ALTER PROFILE <profile_name> LIMIT PASSWORD_REUSE_MAX 20;
+    ALTER PROFILE <profile_name> LIMIT PASSWORD_REUSE_MAX #{input('password_reuse_max')};
     ```
   "
   impact 0.5
@@ -77,7 +77,7 @@ To assess this recommendation, execute the following SQL statement.
        FROM DBA_PROFILES
        WHERE PROFILE='DEFAULT'
        AND RESOURCE_NAME='PASSWORD_REUSE_MAX'),
-       'UNLIMITED','9999',P.LIMIT)) < 20 AND
+       'UNLIMITED','9999',P.LIMIT)) < #{ input('password_reuse_max') == 'UNLIMITED'? '9999' : input('password_reuse_max') } AND
        P.RESOURCE_NAME = 'PASSWORD_REUSE_MAX' AND
        EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     "
@@ -95,14 +95,14 @@ To assess this recommendation, execute the following SQL statement.
        WHERE PROFILE='DEFAULT'
        AND RESOURCE_NAME='PASSWORD_REUSE_MAX'
        AND CON_ID = P.CON_ID),
-       'UNLIMITED','9999',P.LIMIT)) < 20
+       'UNLIMITED','9999',P.LIMIT)) < #{ input('password_reuse_max') == 'UNLIMITED'? '9999' : input('password_reuse_max') }
       AND P.RESOURCE_NAME = 'PASSWORD_REUSE_MAX'
       AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
       ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Passwords for all profiles should not be reused -- profiles with PASSWORD_REUSE_MAX > 20' do
+  describe "Passwords for all profiles should not be reused -- profiles with PASSWORD_REUSE_MAX > #{input('password_reuse_max')}" do
     subject { parameter }
     it { should be_empty }
   end

@@ -1,5 +1,5 @@
 control 'oracle19c-3.1' do
-  title "Ensure 'FAILED_LOGIN_ATTEMPTS' Is Less than or Equal to '5'"
+  title "Ensure 'FAILED_LOGIN_ATTEMPTS' Is Less than or Equal to '#{input('failed_login_attempts')}'"
   desc  "The `FAILED_LOGIN_ATTEMPTS` setting determines how many failed login
 attempts are permitted before the system locks the user's account. While
 different profiles can have different and more restrictive settings, such as
@@ -22,7 +22,7 @@ that can make this security measure backfire.)"
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='FAILED_LOGIN_ATTEMPTS'),
      'UNLIMITED','9999',
-     P.LIMIT)) > 5
+     P.LIMIT)) > #{input('failed_login_attempts')}
     AND P.RESOURCE_NAME = 'FAILED_LOGIN_ATTEMPTS'
     AND EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE ) ;
 
@@ -44,7 +44,7 @@ To assess this recommendation, execute the following SQL statement.
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='FAILED_LOGIN_ATTEMPTS'
      AND CON_ID = P.CON_ID),
-     'UNLIMITED','9999',P.LIMIT)) > 5
+     'UNLIMITED','9999',P.LIMIT)) > #{input('failed_login_attempts')}
     AND P.RESOURCE_NAME = 'FAILED_LOGIN_ATTEMPTS'
     AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
     ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
@@ -55,7 +55,7 @@ To assess this recommendation, execute the following SQL statement.
     Remediate this setting by executing the following SQL statement for each
 `PROFILE` returned by the audit procedure.
     ```
-    ALTER PROFILE <profile_name> LIMIT FAILED_LOGIN_ATTEMPTS 5;
+    ALTER PROFILE <profile_name> LIMIT FAILED_LOGIN_ATTEMPTS #{input('failed_login_attempts')};
     ```
   "
   impact 0.5
@@ -83,7 +83,7 @@ To assess this recommendation, execute the following SQL statement.
        WHERE PROFILE='DEFAULT'
        AND RESOURCE_NAME='FAILED_LOGIN_ATTEMPTS'),
        'UNLIMITED','9999',
-       P.LIMIT)) > 5
+       P.LIMIT)) > #{input('failed_login_attempts')}
       AND P.RESOURCE_NAME = 'FAILED_LOGIN_ATTEMPTS'
       AND EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE ) ;
     "
@@ -101,14 +101,14 @@ To assess this recommendation, execute the following SQL statement.
        WHERE PROFILE='DEFAULT'
        AND RESOURCE_NAME='FAILED_LOGIN_ATTEMPTS'
        AND CON_ID = P.CON_ID),
-       'UNLIMITED','9999',P.LIMIT)) > 5
+       'UNLIMITED','9999',P.LIMIT)) > #{input('failed_login_attempts')}
       AND P.RESOURCE_NAME = 'FAILED_LOGIN_ATTEMPTS'
       AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
       ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Limit maximum failed login attempts for each profile -- profiles with FAILED_LOGIN_ATTEMPTS > 5' do
+  describe "Limit maximum failed login attempts for each profile -- profiles with FAILED_LOGIN_ATTEMPTS > #{input('failed_login_attempts')}" do
     subject { parameter }
     it { should be_empty }
   end
