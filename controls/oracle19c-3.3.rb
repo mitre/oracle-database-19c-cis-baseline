@@ -1,8 +1,8 @@
 control 'oracle19c-3.3' do
-  title "Ensure 'PASSWORD_LIFE_TIME' Is Less than or Equal to '90'"
+  title "Ensure 'PASSWORD_LIFE_TIME' Is Less than or Equal to '#{input('password_life_time')}'"
   desc  "The `PASSWORD_LIFE_TIME` setting determines how long a password may be
 used before the user is required to be change it. The suggested value for this
-is 90 days or less."
+is #{input('password_life_time')} days or less."
   desc  'rationale', "Allowing passwords to remain unchanged for long periods
 makes the success of brute-force login attacks more likely."
   desc  'check', "
@@ -17,7 +17,7 @@ makes the success of brute-force login attacks more likely."
      FROM DBA_PROFILES
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='PASSWORD_LIFE_TIME'),
-     'UNLIMITED','9999',P.LIMIT)) > 90 AND
+     'UNLIMITED','9999',P.LIMIT)) > #{input('password_life_time')} AND
      P.RESOURCE_NAME = 'PASSWORD_LIFE_TIME' AND
      EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     ```
@@ -39,7 +39,7 @@ To assess this recommendation, execute the following SQL statement.
      AND RESOURCE_NAME='PASSWORD_LIFE_TIME'
      AND CON_ID = P.CON_ID),
      'UNLIMITED','9999',
-     P.LIMIT)) > 90
+     P.LIMIT)) > #{input('password_life_time')}
     AND P.RESOURCE_NAME = 'PASSWORD_LIFE_TIME'
     AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
     ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
@@ -50,7 +50,7 @@ To assess this recommendation, execute the following SQL statement.
     Remediate this setting by executing the following SQL statement for each
 PROFILE returned by the audit procedure.
     ```
-    ALTER PROFILE <profile_name> LIMIT PASSWORD_LIFE_TIME 90;
+    ALTER PROFILE <profile_name> LIMIT PASSWORD_LIFE_TIME #{input('password_life_time')};
     ```
   "
   impact 0.5
@@ -77,7 +77,7 @@ PROFILE returned by the audit procedure.
      FROM DBA_PROFILES
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='PASSWORD_LIFE_TIME'),
-     'UNLIMITED','9999',P.LIMIT)) > 90 AND
+     'UNLIMITED','9999',P.LIMIT)) > #{input('password_life_time')} AND
      P.RESOURCE_NAME = 'PASSWORD_LIFE_TIME' AND
      EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     "
@@ -96,14 +96,14 @@ PROFILE returned by the audit procedure.
        AND RESOURCE_NAME='PASSWORD_LIFE_TIME'
        AND CON_ID = P.CON_ID),
        'UNLIMITED','9999',
-       P.LIMIT)) > 90
+       P.LIMIT)) > #{input('password_life_time')}
       AND P.RESOURCE_NAME = 'PASSWORD_LIFE_TIME'
       AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
       ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Passwords for all profiles should be set to change frequently -- profiles with PASSWORD_LIFE_TIME > 90' do
+  describe "Passwords for all profiles should be set to change frequently -- profiles with PASSWORD_LIFE_TIME > #{input('password_life_time')}" do
     subject { parameter }
     it { should be_empty }
   end

@@ -6,10 +6,11 @@ copyright_email: saf@groups.mitre.org
 license: Apache-2.0
 summary: InSpec testing for baseline compliance with the Oracle 19c
 inspec_version: ">= 4.0"
-version: 1.0.0
+version: 1.0.1
 
 inputs:
   - name: user
+    sensitive: true
     description: 'username Oracle DB'
     type: String
     required: true
@@ -22,11 +23,13 @@ inputs:
     required: true
 
   - name: host
+    sensitive: true
     description: 'hostname Oracle DB'
     type: String
     required: true
 
   - name: service
+    sensitive: true
     description: 'service name Oracle DB'
     type: String
     required: true
@@ -61,3 +64,45 @@ inputs:
     required: true
     value:
       - 'LISTENER'
+
+# oracle19c-3.1
+  - name: failed_login_attempts
+    description: 'Number of failed login attempts'
+    type: Numeric
+    value: 5
+
+# oracle19c-3.2
+  - name: password_lock_time
+    description: 'Number of days that user accounts are locked after set number of failed login attempts. Acceptable values are any number, fraction, decimal, or "UNLIMITED"'
+    type: String
+    value: '1'
+
+# oracle19c-3.3
+  - name: password_life_time
+    description: 'Number of days after which passwords are required to be changed'
+    type: Numeric
+    value: 90
+
+# oracle19c-3.4
+  - name: password_reuse_max
+    description: 'Number of password changes required before the current password can be reused. Acceptable values are any integer or "UNLIMITED" to disallow reuse'
+    type: String
+    value: '20'
+
+# oracle19c-3.6
+  - name: password_grace_time
+    description: 'Number of days that can pass after password expiration before account lockout'
+    type: Numeric
+    value: 5
+
+# oracle19c-3.8
+  - name: sessions_per_user
+    description: 'Number of concurrent sessions allowed'
+    type: Numeric
+    value: 10
+
+# oracle19c-3.9
+  - name: inactive_account_time
+    description: 'Number of days of inactivity after which account is locked'
+    type: Numeric
+    value: 120

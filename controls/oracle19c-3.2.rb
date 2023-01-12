@@ -1,8 +1,8 @@
 control 'oracle19c-3.2' do
-  title "Ensure 'PASSWORD_LOCK_TIME' Is Greater than or Equal to '1'"
+  title "Ensure 'PASSWORD_LOCK_TIME' Is Greater than or Equal to '#{input('password_lock_time')}'"
   desc  "The `PASSWORD_LOCK_TIME` setting determines how many days must pass
 for the user's account to be unlocked after the set number of failed login
-attempts has occurred. The suggested value for this is one day or greater."
+attempts has occurred. The suggested value for this is #{input('password_lock_time')} day(s) or greater."
   desc  'rationale', "Locking the user account after repeated failed login
 attempts can block further brute-force login attacks, but can create
 administrative headaches as this account unlocking process always requires DBA
@@ -20,7 +20,7 @@ intervention."
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='PASSWORD_LOCK_TIME'),
      'UNLIMITED','9999',
-     P.LIMIT)) < 1
+     P.LIMIT)) < #{ input('password_lock_time') == 'UNLIMITED'? '9999' : input('password_lock_time') }
     AND P.RESOURCE_NAME = 'PASSWORD_LOCK_TIME'
     AND EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     ```
@@ -41,7 +41,7 @@ To assess this recommendation, execute the following SQL statement.
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='PASSWORD_LOCK_TIME'
      AND CON_ID = P.CON_ID),
-     'UNLIMITED','9999',P.LIMIT)) < 1
+     'UNLIMITED','9999',P.LIMIT)) < #{ input('password_lock_time') == 'UNLIMITED'? '9999' : input('password_lock_time') }
     AND P.RESOURCE_NAME = 'PASSWORD_LOCK_TIME'
     AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
     ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
@@ -52,7 +52,7 @@ To assess this recommendation, execute the following SQL statement.
     Remediate this setting by executing the following SQL statement for each
 `PROFILE` returned by the audit procedure.
     ```
-    ALTER PROFILE <profile_name> LIMIT PASSWORD_LOCK_TIME 1;
+    ALTER PROFILE <profile_name> LIMIT PASSWORD_LOCK_TIME #{input('password_lock_time')};
     ```
   "
   impact 0.5
@@ -80,7 +80,7 @@ To assess this recommendation, execute the following SQL statement.
        WHERE PROFILE='DEFAULT'
        AND RESOURCE_NAME='PASSWORD_LOCK_TIME'),
        'UNLIMITED','9999',
-       P.LIMIT)) < 1
+       P.LIMIT)) < #{ input('password_lock_time') == 'UNLIMITED'? '9999' : input('password_lock_time') }
       AND P.RESOURCE_NAME = 'PASSWORD_LOCK_TIME'
       AND EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     "
@@ -98,14 +98,14 @@ To assess this recommendation, execute the following SQL statement.
        WHERE PROFILE='DEFAULT'
        AND RESOURCE_NAME='PASSWORD_LOCK_TIME'
        AND CON_ID = P.CON_ID),
-       'UNLIMITED','9999',P.LIMIT)) < 1
+       'UNLIMITED','9999',P.LIMIT)) < #{ input('password_lock_time') == 'UNLIMITED'? '9999' : input('password_lock_time') }
       AND P.RESOURCE_NAME = 'PASSWORD_LOCK_TIME'
       AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
       ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Ensure locktime of at least one day for each profile password after a lockout -- profiles with PASSWORD_LOCK_TIME < 1' do
+  describe "Ensure locktime of at least #{input('password_lock_time')} day(s) for each profile password after a lockout -- profiles with PASSWORD_LOCK_TIME < #{input('password_lock_time')}" do
     subject { parameter }
     it { should be_empty }
   end

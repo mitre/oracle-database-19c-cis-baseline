@@ -1,5 +1,5 @@
 control 'oracle19c-3.6' do
-  title "Ensure 'PASSWORD_GRACE_TIME' Is Less than or Equal to '5'"
+  title "Ensure 'PASSWORD_GRACE_TIME' Is Less than or Equal to '#{input('password_grace_time')}'"
   desc  "The `PASSWORD_GRACE_TIME` setting determines how many days can pass
 after the user's password expires before the user's login capability is
 automatically locked out. The suggested value for this is five days or less."
@@ -19,7 +19,7 @@ account and its information to be accessible by DBA intervention."
      FROM DBA_PROFILES
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='PASSWORD_GRACE_TIME'),
-     'UNLIMITED','9999',P.LIMIT)) > 5 AND
+     'UNLIMITED','9999',P.LIMIT)) > #{input('password_grace_time')} AND
      P.RESOURCE_NAME = 'PASSWORD_GRACE_TIME' AND
      EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     ```
@@ -40,7 +40,7 @@ To assess this recommendation, execute the following SQL statement.
      WHERE PROFILE='DEFAULT'
      AND RESOURCE_NAME='PASSWORD_GRACE_TIME'
      AND CON_ID = P.CON_ID),
-     'UNLIMITED','9999',P.LIMIT)) > 5
+     'UNLIMITED','9999',P.LIMIT)) > #{input('password_grace_time')}
     AND P.RESOURCE_NAME = 'PASSWORD_GRACE_TIME'
     AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
     ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
@@ -51,7 +51,7 @@ To assess this recommendation, execute the following SQL statement.
     Remediate this setting by executing the following SQL statement for each
 `PROFILE` returned by the audit procedure.
     ```
-    ALTER PROFILE <profile_name> LIMIT PASSWORD_GRACE_TIME 5;
+    ALTER PROFILE <profile_name> LIMIT PASSWORD_GRACE_TIME #{input('password_grace_time')};
     ```
   "
   impact 0.5
@@ -78,7 +78,7 @@ To assess this recommendation, execute the following SQL statement.
        FROM DBA_PROFILES
        WHERE PROFILE='DEFAULT'
        AND RESOURCE_NAME='PASSWORD_GRACE_TIME'),
-       'UNLIMITED','9999',P.LIMIT)) > 5 AND
+       'UNLIMITED','9999',P.LIMIT)) > #{input('password_grace_time')} AND
        P.RESOURCE_NAME = 'PASSWORD_GRACE_TIME' AND
        EXISTS ( SELECT 'X' FROM DBA_USERS U WHERE U.PROFILE = P.PROFILE );
     "
@@ -96,14 +96,14 @@ To assess this recommendation, execute the following SQL statement.
        WHERE PROFILE='DEFAULT'
        AND RESOURCE_NAME='PASSWORD_GRACE_TIME'
        AND CON_ID = P.CON_ID),
-       'UNLIMITED','9999',P.LIMIT)) > 5
+       'UNLIMITED','9999',P.LIMIT)) > #{input('password_grace_time')}
       AND P.RESOURCE_NAME = 'PASSWORD_GRACE_TIME'
       AND EXISTS ( SELECT 'X' FROM CDB_USERS U WHERE U.PROFILE = P.PROFILE )
       ORDER BY CON_ID, PROFILE, RESOURCE_NAME;
     "
                  end
   parameter = sql.query(query_string)
-  describe 'Passwords that expire without being changed should lock out the user after a short grace period -- profiles with PASSWORD_GRACE_TIME > 5' do
+  describe "Passwords that expire without being changed should lock out the user after a short grace period -- profiles with PASSWORD_GRACE_TIME > #{input('password_grace_time')}" do
     subject { parameter }
     it { should be_empty }
   end
