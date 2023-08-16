@@ -79,7 +79,12 @@ ORACLE_MAINTAINED='Y')
     AND GRANTEE NOT IN (SELECT ROLE FROM CDB_ROLES WHERE ORACLE_MAINTAINED='Y');
     "
                  end
-  parameter = sql.query(query_string)
+  parameter = sql.query(query_string).rows
+
+  if input('exempted_privileged_accounts')
+    parameter = parameter.reject { |account| input('exempted_privileged_accounts').include?(account.grantee) }
+  end
+
   describe 'Unauthorized users should not have EXECUTE privileges on data dictionary -- list of GRANTEES with `EXECUTE_CATALOG_ROLE` privileges' do
     subject { parameter }
     it { should be_empty }

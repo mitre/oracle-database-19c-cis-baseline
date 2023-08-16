@@ -107,7 +107,7 @@ inputs:
     type: Numeric
     value: 120
 
-# oracle19c-5.2.X
+# oracle19c-5.2.X, oracle19c-5.3.X
   - name: exempted_privileged_accounts
     description: 'List of accounts which are permitted to have elevated privileges'
     type: Array
