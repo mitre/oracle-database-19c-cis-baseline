@@ -82,6 +82,10 @@ ORACLE_MAINTAINED='Y')
     "
                  end
   parameter = sql.query(query_string)
+
+  if input('exempted_privileged_accounts')
+    parameter = parameter.reject { |account| account in input('exempted_privileged_accounts') }
+
   describe 'Unauthorized users should not be able to select from access SSY schema objects -- list of GRANTEES with `SELECT ANY DICTIONARY` privileges' do
     subject { parameter }
     it { should be_empty }
