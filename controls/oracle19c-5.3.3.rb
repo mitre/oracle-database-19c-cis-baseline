@@ -89,7 +89,18 @@ connect to both places to revoke.
       ORDER BY CON_ID, TABLE_NAME;
     "
                  end
-  parameter = sql.query(query_string)
+  parameter = sql.query(query_string).rows
+
+  exempted_privileged_accounts = input('exempted_privileged_accounts').map { |account| 
+    account.upcase
+  }
+
+  if input('exempted_privileged_accounts')
+    parameter = parameter.reject { |account| 
+      exempted_privileged_accounts.include?(account['grantee'].upcase)
+    }
+  end
+
   describe 'Public users should not be able to execute the `DBMS_ADVISOR`, `DBMS_LOB` or `UTL_FILE` packages -- list of File System packages with public execute privileges' do
     subject { parameter }
     it { should be_empty }
