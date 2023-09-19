@@ -81,8 +81,14 @@ ORACLE_MAINTAINED='Y')
                  end
   parameter = sql.query(query_string).rows
 
+  exempted_privileged_accounts = input('exempted_privileged_accounts').map { |account| 
+    account.upcase
+  }
+
   if input('exempted_privileged_accounts')
-    parameter = parameter.reject { |account| input('exempted_privileged_accounts').include?(account.grantee) }
+    parameter = parameter.reject { |account| 
+      exempted_privileged_accounts.include?(account['grantee'].upcase)
+    }
   end
   
   describe 'Unauthorized users should not be able to select from any table -- list of GRANTEES with `SELECT ANY TABLE` privileges' do

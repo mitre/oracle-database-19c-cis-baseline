@@ -82,10 +82,15 @@ ORACLE_MAINTAINED='Y')
                  end
   parameter = sql.query(query_string).rows
 
-  if input('exempted_privileged_accounts')
-    parameter = parameter.reject { |account| input('exempted_privileged_accounts').include?(account.grantee) }
-  end
+  exempted_privileged_accounts = input('exempted_privileged_accounts').map { |account| 
+    account.upcase
+  }
 
+  if input('exempted_privileged_accounts')
+    parameter = parameter.reject { |account| 
+      exempted_privileged_accounts.include?(account['grantee'].upcase)
+    }
+  end
   describe 'Unauthorized users should not have admin privileges -- list of GRANTEES with `WITH_ADMIN` privileges' do
     subject { parameter }
     it { should be_empty }
